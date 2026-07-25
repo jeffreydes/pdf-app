@@ -24,19 +24,21 @@ export default function Home() {
     { name: 'Black', hex: '#111111' }, { name: 'Yellow', hex: '#FACC15' }, { name: 'Grey', hex: '#D1D5DB' },
   ];
 
-  // --- LEMON SQUEEZY EVENT LISTENER ---
-  useEffect(() => {
-    // Koppel de Lemon Squeezy event handler
-    (window as any).lemonSqueezy = {
-      Setup: {
+  // --- LEMON SQUEEZY INITIALISATIE ---
+  const handleLemonSqueezyScriptLoad = () => {
+    if (typeof window !== 'undefined' && (window as any).createLemonSqueezy) {
+      (window as any).createLemonSqueezy();
+      
+      // Koppel de event handler aan de Lemon Squeezy instantie
+      (window as any).LemonSqueezy?.Setup({
         eventHandler: (event: any) => {
           if (event.event === 'Checkout.Success') {
             setHasPaid(true); // Triggert de download useEffect
           }
         }
-      }
-    };
-  }, []);
+      });
+    }
+  };
 
   // Triggert volautomatisch de schone PDF zodra er succesvol betaald is
   useEffect(() => {
@@ -98,8 +100,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-100 text-zinc-900 font-sans pb-32">
       
-      {/* Inject Lemon Squeezy Script in Next.js */}
-      <Script src="https://assets.lemonsqueezy.com/lemon.js" strategy="lazyOnload" />
+      {/* Inject Lemon Squeezy Script in Next.js & Run Init op Ready */}
+      <Script 
+        src="https://assets.lemonsqueezy.com/lemon.js" 
+        strategy="afterInteractive"
+        onReady={handleLemonSqueezyScriptLoad}
+      />
 
       {/* HEADER */}
       <div className="bg-white border-b border-zinc-200 sticky top-0 z-50">
