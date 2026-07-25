@@ -1,5 +1,4 @@
 import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium-min';
 
 const formatText = (txt: string) => (txt ? txt.replace(/\n/g, '<br/>') : '');
 
@@ -104,18 +103,9 @@ export async function POST(req: Request) {
       fontFamilyRule = `'CustomUserFont', 'Inter', sans-serif`;
     }
 
-    // Check of we lokaal (development) of in de cloud (production op Vercel) draaien
-    const isDev = process.env.NODE_ENV === 'development';
-
-    const browser = await puppeteer.launch({
-      args: isDev ? [] : chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: isDev
-        ? undefined
-        : await chromium.executablePath(
-            'https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar'
-          ),
-      headless: isDev ? true : (chromium.headless as any),
+    // Verbind met Browserless.io via de API Key
+    const browser = await puppeteer.connect({
+      browserWSEndpoint: 'wss://chrome.browserless.io?token=2Ux3shWGILlWVL2936ab4b2f23a7a88c7d45a76f61836bbaa'
     });
 
     const page = await browser.newPage();
