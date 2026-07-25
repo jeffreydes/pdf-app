@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import chromium from '@sparticuz/chromium-min';
 
 const formatText = (txt: string) => (txt ? txt.replace(/\n/g, '<br/>') : '');
 
@@ -112,7 +112,9 @@ export async function POST(req: Request) {
       defaultViewport: chromium.defaultViewport,
       executablePath: isDev
         ? undefined
-        : await chromium.executablePath(),
+        : await chromium.executablePath(
+            'https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar'
+          ),
       headless: isDev ? true : (chromium.headless as any),
     });
 
