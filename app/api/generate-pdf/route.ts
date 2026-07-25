@@ -113,7 +113,7 @@ export async function POST(req: Request) {
       executablePath: isDev
         ? undefined
         : await chromium.executablePath(),
-      headless: isDev ? true : chromium.headless,
+      headless: isDev ? true : (chromium.headless as any),
     });
 
     const page = await browser.newPage();
