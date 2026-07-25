@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@sparticuz/chromium": "^149.0.0",
+    "@sparticuz/chromium-min": "^149.0.0",
     "@stripe/react-stripe-js": "^6.8.0",
     "@stripe/stripe-js": "^9.12.0",
     "marked": "^18.0.7",

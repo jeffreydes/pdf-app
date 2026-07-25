@@ -1,8 +1,10 @@
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium-min';
 
-const formatText = (txt: string) => txt.replace(/\n/g, '<br/>');
+const formatText = (txt: string) => (txt ? txt.replace(/\n/g, '<br/>') : '');
 
 function parseContent(rawText: string) {
+  if (!rawText) return '';
   const lines = rawText.split('\n');
   let html = '';
   let inList = false;
@@ -102,7 +104,20 @@ export async function POST(req: Request) {
       fontFamilyRule = `'CustomUserFont', 'Inter', sans-serif`;
     }
 
-    const browser = await puppeteer.launch({ headless: true });
+    // Check of we lokaal (development) of in de cloud (production op Vercel) draaien
+    const isDev = process.env.NODE_ENV === 'development';
+
+    const browser = await puppeteer.launch({
+      args: isDev ? [] : chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: isDev
+        ? undefined
+        : await chromium.executablePath(
+            'https://github.com/sparticuz/chromium/releases/download/v131.0.0/chromium-v131.0.0-pack.tar'
+          ),
+      headless: isDev ? true : chromium.headless,
+    });
+
     const page = await browser.newPage();
 
     let coverImageHtml = '';
@@ -136,7 +151,7 @@ export async function POST(req: Request) {
               --text-gray: #6B7280;
             }
 
-            /* DE OPLOSSING VOOR DE AFGESNEDEN TEKST: Vaste Marges voor alle PDF pagina's */
+            /* Marges voor alle PDF pagina's */
             @page { size: A4; margin: 25mm 20mm; }
             * { box-sizing: border-box; }
             
@@ -150,11 +165,9 @@ export async function POST(req: Request) {
               print-color-adjust: exact;
             }
 
-            /* =========================================
-               COVER PAGE
-               ========================================= */
+            /* COVER PAGE */
             .cover-page {
-              min-height: calc(297mm - 50mm); /* Volledige A4 hoogte minus top/bottom @page margins */
+              min-height: calc(297mm - 50mm);
               display: flex;
               flex-direction: column;
               page-break-after: always;
@@ -201,7 +214,7 @@ export async function POST(req: Request) {
             .cover-image {
               margin-left: -20mm;
               margin-right: -20mm;
-              margin-bottom: -25mm; /* Bleeds in de bottom @page margin */
+              margin-bottom: -25mm;
               height: 110mm;
               background-size: cover;
               background-position: center;
@@ -209,10 +222,7 @@ export async function POST(req: Request) {
               border-top: 4px solid var(--black);
             }
 
-            /* =========================================
-               INNER PAGES
-               ========================================= */
-            
+            /* INNER PAGES */
             .page-header {
               font-size: 38pt;
               font-weight: 900;
@@ -370,7 +380,10 @@ export async function POST(req: Request) {
     const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
     await browser.close();
 
-    return new Response(pdfBuffer as any, { status: 200, headers: { 'Content-Type': 'application/pdf' }});
+    return new Response(pdfBuffer as any, { 
+      status: 200, 
+      headers: { 'Content-Type': 'application/pdf' }
+    });
   } catch (error) {
     console.error(error);
     return new Response(JSON.stringify({ error: 'PDF generation failed' }), { status: 500 });
