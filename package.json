@@ -1,4 +1,18 @@
-"dependencies": {
-  "@sparticuz/chromium": "^131.0.0",
-  "puppeteer-core": "^23.0.0"
+{
+  "name": "pdfbuilder",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@sparticuz/chromium": "^131.0.0",
+    "next": "15.1.0",
+    "puppeteer-core": "^23.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
 }
