@@ -370,7 +370,7 @@ export async function POST(req: Request) {
     const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
     await browser.close();
 
-    return new Response(pdfBuffer, { status: 200, headers: { 'Content-Type': 'application/pdf' }});
+    return new Response(pdfBuffer as any, { status: 200, headers: { 'Content-Type': 'application/pdf' }});
   } catch (error) {
     console.error(error);
     return new Response(JSON.stringify({ error: 'PDF generation failed' }), { status: 500 });
