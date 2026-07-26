@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "QuoteBuilder | Your idea to a functional quote in seconds",
-  description: "Create official, legally compliant PDF quotes in seconds based on your project idea, hourly rate, or company VAT number. Free preview & instant download.",
+  title: "QuoteBuilder | Turn project ideas into client-ready PDF quotes in seconds",
+  description: "Create official, client-ready PDF quotes in seconds based on your project idea, hourly rate, or company VAT number. Free preview & instant download.",
   keywords: [
     "quote maker",
     "free pdf quote generator",
@@ -54,7 +55,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
