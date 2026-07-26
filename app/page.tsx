@@ -408,7 +408,7 @@ export default function Home() {
                 </div>
 
                 {showClientDropdown && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-gray-100">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#FFFFFF] border border-gray-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-gray-100">
                     {clientSuggestions.map((item, idx) => (
                       <div 
                         key={idx} 
@@ -535,4 +535,4 @@ export default function Home() {
       )}
     </div>
   );
-}<
+}
