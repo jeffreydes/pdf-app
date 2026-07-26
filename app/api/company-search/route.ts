@@ -11,9 +11,16 @@ export async function GET(request: Request) {
   const cleanQuery = query.trim();
 
   try {
-    const results: Array<{ name: string; domain?: string; logo?: string; vatNumber?: string; address?: string; source?: string }> = [];
+    const results: Array<{
+      name: string;
+      domain?: string;
+      logo?: string;
+      vatNumber?: string;
+      address?: string;
+      source?: string;
+    }> = [];
 
-    // 1. EU VAT Number Check (e.g., BE0123456789)
+    // 1. Check if it's an EU VAT Number (e.g. BE0123456789)
     if (/^[A-Z]{2}[0-9A-Z]{8,12}$/i.test(cleanQuery)) {
       try {
         const countryCode = cleanQuery.substring(0, 2).toUpperCase();
@@ -29,7 +36,7 @@ export async function GET(request: Request) {
               name: data.name !== '---' ? data.name : `VAT: ${cleanQuery.toUpperCase()}`,
               address: data.address !== '---' ? data.address.replace(/\n/g, ', ') : '',
               vatNumber: cleanQuery.toUpperCase(),
-              source: 'Official EU VAT Registry',
+              source: 'Official EU Registry',
             });
             return NextResponse.json({ results });
           }
@@ -39,73 +46,43 @@ export async function GET(request: Request) {
       }
     }
 
-    // 2. Clearbit Autocomplete API
-    try {
-      const clearbitRes = await fetch(
-        `https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(cleanQuery)}`
-      );
+    // 2. Direct Search via Wikidata (Open, reliable, fast)
+    const wikiUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(
+      cleanQuery
+    )}&language=en&format=json&type=item&origin=*`;
 
-      if (clearbitRes.ok) {
-        const companies = await clearbitRes.json();
-        if (Array.isArray(companies) && companies.length > 0) {
-          companies.slice(0, 5).forEach((comp: any) => {
-            if (comp.name) {
-              results.push({
-                name: comp.name,
-                domain: comp.domain || '',
-                logo: comp.logo || '',
-                source: 'Verified Business',
-              });
-            }
-          });
-        }
-      }
-    } catch (e) {
-      console.error('Clearbit API failed:', e);
-    }
+    const wikiRes = await fetch(wikiUrl);
 
-    // 3. Fallback: Wikidata (Filtered specifically for Business Entities/Organizations)
-    if (results.length === 0) {
-      try {
-        const wikiRes = await fetch(
-          `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(cleanQuery)}&language=en&format=json&type=item&origin=*`
-        );
+    if (wikiRes.ok) {
+      const wikiData = await wikiRes.json();
 
-        if (wikiRes.ok) {
-          const wikiData = await wikiRes.json();
-          if (wikiData.search && Array.isArray(wikiData.search)) {
-            // Filter out common dictionary concepts (like street, word, language)
-            const filtered = wikiData.search.filter((item: any) => {
-              const desc = (item.description || '').toLowerCase();
-              return (
-                desc.includes('company') ||
-                desc.includes('corporation') ||
-                desc.includes('business') ||
-                desc.includes('enterprise') ||
-                desc.includes('firm') ||
-                desc.includes('agency') ||
-                desc.includes('software') ||
-                desc.includes('tech') ||
-                desc.includes('brand') ||
-                desc.includes('manufacturer')
-              );
-            });
+      if (wikiData.search && Array.isArray(wikiData.search)) {
+        // Exclude common generic dictionary terms (like 'street', 'word', 'unit')
+        const genericTerms = ['street', 'thoroughfare', 'common noun', 'unit of measurement'];
 
-            filtered.slice(0, 5).forEach((item: any) => {
-              results.push({
-                name: item.label,
-                domain: item.description || 'Company',
-                source: 'Registry Data',
-              });
+        wikiData.search.forEach((item: any) => {
+          const description = item.description || '';
+          const isGeneric = genericTerms.some((term) =>
+            description.toLowerCase().includes(term)
+          );
+
+          if (!isGeneric && item.label) {
+            // Predict probable domain for favicon display
+            const domainGuess = `${item.label.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
+            const logoUrl = `https://www.google.com/s2/favicons?domain=${domainGuess}&sz=64`;
+
+            results.push({
+              name: item.label,
+              domain: description || 'Company',
+              logo: logoUrl,
+              source: 'Verified Entity',
             });
           }
-        }
-      } catch (e) {
-        console.error('Wikidata fallback failed:', e);
+        });
       }
     }
 
-    return NextResponse.json({ results });
+    return NextResponse.json({ results: results.slice(0, 5) });
   } catch (error) {
     console.error('Company search error:', error);
     return NextResponse.json({ results: [] }, { status: 500 });
