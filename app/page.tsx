@@ -10,20 +10,20 @@ export default function Home() {
 
   // Proposal State Data
   const [mainTitle, setMainTitle] = useState('Offerte');
-  const [subTitle, setSubTitle] = useState('Webontwikkeling & UI Design\nVoor Client Inc.');
-  const [introText, setIntroText] = useState('Wij bieden een complete oplossing voor uw digitale transformatie met moderne webtechnologieën.');
+  const [subTitle, setSubTitle] = useState('Design & Development Proposal\nVoor Client Inc.');
+  const [introText, setIntroText] = useState('Wij bieden een complete premium oplossing voor uw digitale transformatie met Liquid Glass Next.js technologie.');
   const [text, setText] = useState(`# Investeringsoverzicht\n\n## Projectfases\n\n- Phase 1: UX/UI Design & Prototyping\n- Phase 2: Next.js Frontend Development\n- Phase 3: Deployment & Testing\n\n[PRICE] Totale Investering : € 4.500,-`);
   
-  const [accentColor, setAccentColor] = useState('#007AFF');
+  const [accentColor, setAccentColor] = useState('#A855F7');
   const [columns, setColumns] = useState<number>(2);
   const [logo, setLogo] = useState<string | null>(null);
 
   const colors = [
-    { name: 'Apple Blue', hex: '#007AFF' },
-    { name: 'Midnight', hex: '#1C1C1E' },
-    { name: 'Emerald', hex: '#34C759' },
-    { name: 'Sunset', hex: '#FF9500' },
-    { name: 'Purple', hex: '#AF52DE' },
+    { name: 'Liquid Violet', hex: '#A855F7' },
+    { name: 'Deep Indigo', hex: '#6366F1' },
+    { name: 'Ocean Cyan', hex: '#06B6D4' },
+    { name: 'Rose Glow', hex: '#EC4899' },
+    { name: 'Pure White', hex: '#FFFFFF' },
   ];
 
   // Lemon Squeezy Init
@@ -47,14 +47,13 @@ export default function Home() {
     }
   }, [hasPaid]);
 
-  // AI Generator Simulator / Parser
   const handleAiGenerate = () => {
     if (!prompt.trim()) return;
     setIsGenerating(true);
 
     setTimeout(() => {
       setMainTitle('Offerte');
-      setSubTitle(`Op maat gemaakt voor:\n${prompt.slice(0, 30)}...`);
+      setSubTitle(`Op maat gemaakt voor:\n${prompt.slice(0, 35)}...`);
       setIntroText(`Naar aanleiding van uw aanvraag voor "${prompt}" hebben wij deze op maat gemaakte offerte samengesteld. Hierin vindt u de voorwaarden en investering.`);
       setText(`# Specificaties & Investering\n\n## Overzicht van Werkzaamheden\n\n- Analyse & Strategie : Inbegrepen\n- Uitvoering & Oplevering : Volgens planning\n- Support & Garantie : 30 dagen kostenloos\n\n[PRICE] Totaalprijs : € 2.950,-`);
       setIsGenerating(false);
@@ -97,89 +96,110 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] font-sans antialiased selection:bg-blue-500 selection:text-white pb-20">
+    <div className="relative min-h-screen bg-[#06040A] text-white font-sans antialiased overflow-hidden selection:bg-purple-500 selection:text-white pb-24">
       
+      {/* BACKGROUND LIQUID ORGANIC SHAPES (Met paarse ambient glow zoals op ref foto) */}
+      <div className="absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] rounded-full bg-gradient-to-br from-purple-900/40 via-purple-600/20 to-transparent blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-gradient-to-tl from-fuchsia-900/30 via-indigo-900/20 to-transparent blur-[140px] pointer-events-none" />
+      
+      {/* BACKGROUND WAVE CURVES (Sfeer van de foto) */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/10 via-transparent to-transparent pointer-events-none" />
+
       <Script 
         src="https://assets.lemonsqueezy.com/lemon.js" 
         strategy="afterInteractive"
         onReady={handleLemonSqueezyScriptLoad}
       />
 
-      {/* TOP NAVIGATION BAR */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-black/5 px-8 py-3 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1.5 mr-3">
-            <div className="w-3 h-3 rounded-full bg-[#FF5F56] border border-black/10" />
-            <div className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-black/10" />
-            <div className="w-3 h-3 rounded-full bg-[#27C93F] border border-black/10" />
+      {/* TOP NAVIGATION BAR - Glass Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-2xl bg-white/[0.03] border-b border-white/[0.08] px-8 py-4 flex justify-between items-center shadow-2xl">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-fuchsia-400 p-[1px] shadow-lg shadow-purple-500/20">
+            <div className="w-full h-full bg-[#0B0813] rounded-full flex items-center justify-center">
+              <span className="text-xs font-bold text-purple-300">LG</span>
+            </div>
           </div>
-          <span className="font-semibold text-sm tracking-tight text-black/80">PDF Studio</span>
+          <span className="font-semibold text-sm tracking-wide text-white/90">Liquid Glass Studio</span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <button 
             onClick={() => generateDocument(true)}
             disabled={isGenerating}
-            className="px-4 py-1.5 rounded-full text-xs font-medium bg-black/5 hover:bg-black/10 text-black/80 transition-all active:scale-95"
+            className="px-5 py-2 rounded-full text-xs font-medium bg-white/[0.05] hover:bg-white/[0.1] text-white/80 border border-white/[0.1] backdrop-blur-md transition-all active:scale-95 shadow-lg"
           >
             {isGenerating ? 'Laden...' : 'Preview PDF'}
           </button>
           
+          {/* LIQUID GLASS BUTTON (Zoals de "Try the glass" button uit de foto) */}
           <a 
             href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
-            className="lemonsqueezy-button px-4 py-1.5 rounded-full text-xs font-semibold bg-[#007AFF] hover:bg-[#0066CC] text-white shadow-sm transition-all active:scale-95 cursor-pointer"
+            className="lemonsqueezy-button relative group px-6 py-2 rounded-full text-xs font-semibold text-white backdrop-blur-xl bg-gradient-to-r from-purple-500/30 via-fuchsia-500/20 to-purple-500/30 border border-white/30 shadow-[0_8px_32px_rgba(168,85,247,0.3)] hover:shadow-[0_12px_40px_rgba(168,85,247,0.5)] transition-all duration-300 active:scale-95 overflow-hidden cursor-pointer inline-block"
           >
-            Download High-Res
+            {/* Liquid Highlight bar */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+            <span className="relative z-10 flex items-center gap-2">
+              Download High-Res
+            </span>
           </a>
         </div>
       </header>
 
-      {/* MAIN CONTAINER */}
-      <main className="max-w-4xl mx-auto pt-16 px-6">
+      {/* MAIN CONTENT HERO SECTION */}
+      <main className="relative z-10 max-w-4xl mx-auto pt-20 px-6">
         
-        {/* HERO PROMPT SECTION */}
-        <div className="text-center mb-10">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-black/90 mb-3">
-            Typ je idee. Ontvang je offerte.
+        {/* TITEL COMPOSITIE (Gekopieerd qua grootte, gewicht & stijl uit referentiefoto) */}
+        <div className="text-center mb-10 space-y-4">
+          <h1 className="text-6xl sm:text-8xl font-black tracking-tight text-white drop-shadow-[0_10px_35px_rgba(0,0,0,0.8)]">
+            Liquid Glass
           </h1>
-          <p className="text-base text-black/50 font-normal max-w-lg mx-auto">
-            Beschrijf kort wat je aanbiedt. Onze AI stelt binnen enkele seconden een strak gedocumenteerde PDF voor je samen.
+          <p className="text-base sm:text-xl text-purple-200/60 font-light max-w-md mx-auto leading-relaxed">
+            A frosted blur layer you can prompt, explore, and reuse in any offer layout.
           </p>
         </div>
 
-        {/* MACOS APPLE CHATBAR */}
-        <div className="relative bg-white/80 backdrop-blur-xl border border-black/10 rounded-2xl shadow-2xl p-2 transition-all focus-within:ring-4 focus-within:ring-blue-500/20 mb-8">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <svg className="w-5 h-5 text-black/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <input 
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAiGenerate()}
-              placeholder="Bijv: Offerte voor een Next.js webshop inclusief SEO voor €3.500,-..." 
-              className="w-full bg-transparent text-sm sm:text-base outline-none placeholder:text-black/30 text-black/90"
-            />
-            <button 
-              onClick={handleAiGenerate}
-              disabled={isGenerating || !prompt.trim()}
-              className="bg-[#007AFF] hover:bg-[#0062CC] disabled:opacity-30 text-white p-2.5 rounded-xl transition-all shadow-md active:scale-90 flex-shrink-0"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 12h14M12 5l7 7-7 7" />
+        {/* CHATBAR - CAPSULE LIQUID GLASS PILL */}
+        <div className="relative mb-12">
+          <div className="relative group bg-white/[0.04] backdrop-blur-2xl border border-white/20 rounded-full p-2 shadow-[0_20px_50px_rgba(0,0,0,0.6)] transition-all duration-300 hover:border-purple-500/50 hover:shadow-[0_20px_50px_rgba(168,85,247,0.25)]">
+            {/* Top speculaire glazen rand */}
+            <div className="absolute inset-x-6 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+            
+            <div className="flex items-center gap-3 px-4 py-1">
+              <svg className="w-5 h-5 text-purple-400/70 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-            </button>
+              
+              <input 
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAiGenerate()}
+                placeholder="Type your idea for your offer..." 
+                className="w-full bg-transparent text-sm sm:text-base outline-none placeholder:text-white/30 text-white font-light tracking-wide"
+              />
+
+              {/* GENERATE CAPSULE BUTTON (Exact de 'Try the glass' stijl uit de foto) */}
+              <button 
+                onClick={handleAiGenerate}
+                disabled={isGenerating || !prompt.trim()}
+                className="relative px-6 py-3 rounded-full text-xs font-semibold text-white backdrop-blur-xl bg-gradient-to-r from-purple-600/40 via-fuchsia-500/30 to-purple-600/40 border border-white/30 shadow-[0_4px_20px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_25px_rgba(168,85,247,0.6)] disabled:opacity-30 transition-all active:scale-95 flex-shrink-0"
+              >
+                <div className="absolute inset-0 bg-white/10 rounded-full opacity-0 hover:opacity-100 transition-opacity" />
+                <span className="relative z-10">Generate</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* BENTO INFO BOXES */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {/* BENTO INFO BOXES - FROSTED LIQUID CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
           
-          {/* DRAG & DROP LOGO BOX */}
-          <div className="bg-white/60 backdrop-blur-md border border-black/5 rounded-2xl p-5 hover:border-black/10 transition-all flex flex-col justify-between relative group cursor-pointer overflow-hidden min-h-[140px]">
+          {/* LOGO DRAG & DROP BOX */}
+          <div className="relative group bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:border-purple-500/40 hover:bg-white/[0.05] transition-all duration-300 shadow-xl overflow-hidden flex flex-col justify-between min-h-[160px]">
+            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-black/40 block mb-1">Bedrijfslogo</span>
-              <p className="text-xs text-black/60">Sleep je logo hierheen of klik om te uploaden</p>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-purple-300/60 block mb-1">Company Logo</span>
+              <p className="text-xs text-white/50 font-light">Drag & drop your logo file or click</p>
             </div>
             
             <input 
@@ -190,51 +210,55 @@ export default function Home() {
             />
 
             {logo ? (
-              <div className="mt-3 flex items-center justify-between bg-black/5 p-2 rounded-xl">
-                <img src={logo} alt="Logo" className="h-8 max-w-[100px] object-contain" />
-                <button onClick={(e) => { e.stopPropagation(); setLogo(null); }} className="text-xs text-red-500 font-medium hover:underline z-20">Verwijder</button>
+              <div className="mt-3 flex items-center justify-between bg-white/10 p-2.5 rounded-2xl border border-white/10">
+                <img src={logo} alt="Logo" className="h-7 max-w-[100px] object-contain" />
+                <button onClick={(e) => { e.stopPropagation(); setLogo(null); }} className="text-xs text-rose-400 font-medium hover:underline z-20">Remove</button>
               </div>
             ) : (
-              <div className="mt-3 border-2 border-dashed border-black/10 rounded-xl p-3 text-center group-hover:border-black/20 transition-all">
-                <span className="text-xs text-black/40 font-medium">+ Upload Logo</span>
+              <div className="mt-4 border border-dashed border-white/20 rounded-2xl p-3 text-center group-hover:border-purple-400/40 transition-all bg-white/[0.02]">
+                <span className="text-xs text-white/40 font-medium">+ Upload Logo</span>
               </div>
             )}
           </div>
 
-          {/* COLOR SELECTOR BOX */}
-          <div className="bg-white/60 backdrop-blur-md border border-black/5 rounded-2xl p-5 hover:border-black/10 transition-all flex flex-col justify-between min-h-[140px]">
+          {/* ACCENT STIJL SELECTOR */}
+          <div className="relative group bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:border-purple-500/40 hover:bg-white/[0.05] transition-all duration-300 shadow-xl flex flex-col justify-between min-h-[160px]">
+            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-black/40 block mb-1">Accent Stijl</span>
-              <p className="text-xs text-black/60">Kies de merk-kleur voor de PDF headers</p>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-purple-300/60 block mb-1">Accent Theme</span>
+              <p className="text-xs text-white/50 font-light">Select liquid accent highlights</p>
             </div>
             
-            <div className="flex gap-2 mt-3">
+            <div className="flex gap-2.5 mt-4">
               {colors.map(c => (
                 <button 
                   key={c.hex} 
                   onClick={() => setAccentColor(c.hex)}
                   style={{ backgroundColor: c.hex }}
-                  className={`w-7 h-7 rounded-full border-2 transition-all ${accentColor === c.hex ? 'border-black scale-110 shadow-sm' : 'border-transparent hover:scale-105'}`}
+                  className={`w-7 h-7 rounded-full border border-white/30 transition-all duration-300 ${accentColor === c.hex ? 'ring-2 ring-purple-400 ring-offset-2 ring-offset-black scale-110 shadow-[0_0_15px_rgba(168,85,247,0.8)]' : 'hover:scale-105 opacity-70 hover:opacity-100'}`}
                 />
               ))}
             </div>
           </div>
 
-          {/* LAYOUT OPTIONS BOX */}
-          <div className="bg-white/60 backdrop-blur-md border border-black/5 rounded-2xl p-5 hover:border-black/10 transition-all flex flex-col justify-between min-h-[140px]">
+          {/* LAYOUT CAPSULE SELECTOR */}
+          <div className="relative group bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:border-purple-500/40 hover:bg-white/[0.05] transition-all duration-300 shadow-xl flex flex-col justify-between min-h-[160px]">
+            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-black/40 block mb-1">Pagina Layout</span>
-              <p className="text-xs text-black/60">Aantal kolommen voor inhoud</p>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-purple-300/60 block mb-1">Layout Grid</span>
+              <p className="text-xs text-white/50 font-light">Choose pdf inner columns</p>
             </div>
             
-            <div className="flex gap-2 mt-3">
+            <div className="flex gap-2 mt-4">
               {[1, 2].map(num => (
                 <button 
                   key={num}
                   onClick={() => setColumns(num)}
-                  className={`px-4 py-1.5 rounded-xl text-xs font-semibold border transition-all ${columns === num ? 'bg-black text-white border-black' : 'bg-white text-black/60 border-black/10 hover:bg-black/5'}`}
+                  className={`px-4 py-2 rounded-full text-xs font-medium border transition-all duration-300 ${columns === num ? 'bg-gradient-to-r from-purple-600/50 to-fuchsia-600/50 border-white/40 text-white shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'bg-white/[0.03] border-white/10 text-white/50 hover:bg-white/[0.08]'}`}
                 >
-                  {num} {num === 1 ? 'Kolom' : 'Kolommen'}
+                  {num} {num === 1 ? 'Column' : 'Columns'}
                 </button>
               ))}
             </div>
@@ -242,18 +266,20 @@ export default function Home() {
 
         </div>
 
-        {/* EDITABLE PREVIEW CONTENT */}
-        <div className="bg-white border border-black/5 rounded-2xl shadow-sm p-6">
-          <div className="flex justify-between items-center mb-4 pb-3 border-b border-black/5">
-            <span className="text-xs font-semibold uppercase tracking-wider text-black/40">Gegenereerde Concept Tekst</span>
-            <span className="text-xs text-black/30">Direct aanpasbaar</span>
+        {/* EDITABLE LIQUID TEXTAREA CONTAINER */}
+        <div className="relative bg-white/[0.02] backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl">
+          <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          
+          <div className="flex justify-between items-center mb-4 pb-3 border-b border-white/10">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-purple-300/60">Generated Offer Text</span>
+            <span className="text-xs text-white/30 font-light">Fully Editable</span>
           </div>
           
           <textarea 
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={8}
-            className="w-full bg-transparent font-mono text-xs sm:text-sm text-black/80 leading-relaxed outline-none resize-none"
+            className="w-full bg-transparent font-mono text-xs sm:text-sm text-purple-100/80 leading-relaxed outline-none resize-none placeholder:text-white/20"
           />
         </div>
 

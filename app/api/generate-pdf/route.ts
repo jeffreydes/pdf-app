@@ -12,35 +12,30 @@ function parseContent(rawText: string) {
     const t = lines[i].trim();
     if (t.length === 0) continue;
 
-    // Page Break
     if (t === '---') {
       if (inList) { html += '</ul>\n'; inList = false; }
       html += `<div style="page-break-before: always;"></div>`;
       continue;
     }
 
-    // # Header
     if (t.startsWith('# ')) {
       if (inList) { html += '</ul>\n'; inList = false; }
       html += `<h1 class="page-header">${t.substring(2)}</h1>\n`;
       continue;
     }
 
-    // ## Subheader 
     if (t.startsWith('## ')) {
       if (inList) { html += '</ul>\n'; inList = false; }
       html += `<h2 class="accent-header">${t.substring(3)}</h2>\n`;
       continue;
     }
 
-    // ### Accent Bar
     if (t.startsWith('### ')) {
       if (inList) { html += '</ul>\n'; inList = false; }
       html += `<h3 class="accent-bar">${t.substring(4)}</h3>\n`;
       continue;
     }
 
-    // [PRICE] blokken
     if (t.startsWith('[PRICE] ')) {
       if (inList) { html += '</ul>\n'; inList = false; }
       const content = t.substring(8);
@@ -57,7 +52,6 @@ function parseContent(rawText: string) {
       continue;
     }
 
-    // Lijsten
     if (t.startsWith('- ') || t.startsWith('* ')) {
       if (!inList) { html += `<ul class="custom-list">\n`; inList = true; }
       const split = t.substring(2).split(':');
@@ -82,11 +76,8 @@ export async function POST(req: Request) {
     const data = await req.json();
     const parsedHtml = parseContent(data.text);
     
-    const accentColor = data.accentColor || '#007AFF'; // Apple Blue default
+    const accentColor = data.accentColor || '#A855F7'; 
     const columns = data.columns || 2; 
-    
-    const isLightColor = accentColor.toUpperCase() === '#FACC15' || accentColor.toUpperCase() === '#D1D5DB';
-    const contrastTextColor = isLightColor ? '#111111' : '#FFFFFF';
 
     const browser = await puppeteer.connect({
       browserWSEndpoint: 'wss://chrome.browserless.io?token=2Ux3shWGILlWVL2936ab4b2f23a7a88c7d45a76f61836bbaa'
@@ -108,14 +99,13 @@ export async function POST(req: Request) {
       <html>
         <head>
           <style>
-            @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;600;700;900&family=Inter:wght@400;600;800;900&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
             :root {
               --accent: ${accentColor};
-              --accent-text: ${contrastTextColor};
-              --black: #0D0D0D;
-              --gray: #F5F5F7;
-              --text-gray: #6E6E73;
+              --black: #0A0A0C;
+              --gray: #F4F4F6;
+              --text-gray: #66666E;
             }
 
             @page { size: A4; margin: 25mm 20mm; }
@@ -131,7 +121,6 @@ export async function POST(req: Request) {
               print-color-adjust: exact;
             }
 
-            /* COVER PAGE */
             .cover-page {
               min-height: calc(297mm - 50mm);
               display: flex;
@@ -140,17 +129,11 @@ export async function POST(req: Request) {
               page-break-after: always;
             }
 
-            .logo-container {
-              margin-bottom: 20mm;
-            }
-            .brand-logo {
-              max-height: 25mm;
-              max-width: 60mm;
-              object-fit: contain;
-            }
+            .logo-container { margin-bottom: 20mm; }
+            .brand-logo { max-height: 25mm; max-width: 65mm; object-fit: contain; }
 
             .main-title {
-              font-size: 56pt;
+              font-size: 54pt;
               font-weight: 900;
               letter-spacing: -2.5px;
               line-height: 0.95;
@@ -172,13 +155,12 @@ export async function POST(req: Request) {
               font-weight: 500;
               color: var(--text-gray);
               line-height: 1.6;
-              width: 75%;
+              width: 80%;
               margin: 0;
             }
 
-            /* INNER PAGES */
             .page-header {
-              font-size: 32pt;
+              font-size: 30pt;
               font-weight: 800;
               letter-spacing: -1.5px;
               color: var(--black);
@@ -207,11 +189,11 @@ export async function POST(req: Request) {
 
             .accent-bar {
               background-color: var(--accent);
-              color: var(--accent-text);
+              color: #FFFFFF;
               padding: 3mm 5mm;
               font-size: 10pt;
               font-weight: 700;
-              border-radius: 4px;
+              border-radius: 6px;
               margin-top: 6mm;
               margin-bottom: 4mm;
               display: block;
@@ -221,7 +203,7 @@ export async function POST(req: Request) {
             .price-box {
               background-color: var(--gray);
               padding: 6mm;
-              border-radius: 8px;
+              border-radius: 10px;
               margin-top: 5mm;
               display: flex;
               flex-direction: column;
