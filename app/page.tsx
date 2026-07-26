@@ -11,7 +11,6 @@ interface LineItem {
 }
 
 export default function Home() {
-  // Wizard Step State (1: Prompt, 2: Provider, 3: Client, 4: Pricing & Final)
   const [currentStep, setCurrentStep] = useState<number>(1);
 
   const [prompt, setPrompt] = useState('');
@@ -19,11 +18,17 @@ export default function Home() {
   const [hasPaid, setHasPaid] = useState(false);
   const [logo, setLogo] = useState<string | null>(null);
 
-  // Smart Company Search States
-  const [companyQuery, setCompanyQuery] = useState('');
-  const [companySuggestions, setCompanySuggestions] = useState<any[]>([]);
-  const [isSearchingCompany, setIsSearchingCompany] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
+  // Provider Smart Company Search States (Stap 2)
+  const [providerQuery, setProviderQuery] = useState('');
+  const [providerSuggestions, setProviderSuggestions] = useState<any[]>([]);
+  const [isSearchingProvider, setIsSearchingProvider] = useState(false);
+  const [showProviderDropdown, setShowProviderDropdown] = useState(false);
+
+  // Client Smart Company Search States (Stap 3)
+  const [clientQuery, setClientQuery] = useState('');
+  const [clientSuggestions, setClientSuggestions] = useState<any[]>([]);
+  const [isSearchingClient, setIsSearchingClient] = useState(false);
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
 
   // Client Details
   const [clientName, setClientName] = useState('Valued Client');
@@ -43,14 +48,13 @@ export default function Home() {
   const [scopeText, setScopeText] = useState('');
   const [vatRate, setVatRate] = useState<number>(21);
 
-  // Line Items (Hours & Rates)
+  // Line Items
   const [items, setItems] = useState<LineItem[]>([
     { id: '1', description: 'Discovery & Requirements Analysis', qty: 8, price: 85 },
     { id: '2', description: 'Design & Core Implementation', qty: 24, price: 85 },
     { id: '3', description: 'Testing, Deployment & Handover', qty: 6, price: 85 }
   ]);
 
-  // Calculations
   const subtotal = items.reduce((acc, item) => acc + (item.qty * item.price), 0);
   const vatAmount = subtotal * (vatRate / 100);
   const totalDue = subtotal + vatAmount;
@@ -58,7 +62,6 @@ export default function Home() {
   const formatCurrency = (amount: number) => 
     new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
 
-  // Lemon Squeezy Init
   const handleLemonSqueezyScriptLoad = () => {
     if (typeof window !== 'undefined' && (window as any).createLemonSqueezy) {
       (window as any).createLemonSqueezy();
@@ -77,37 +80,67 @@ export default function Home() {
     }
   }, [hasPaid]);
 
-  // Smart Company Search
-  const handleCompanySearch = async (val: string) => {
-    setCompanyQuery(val);
+  // Provider Search (Stap 2)
+  const handleProviderSearch = async (val: string) => {
+    setProviderQuery(val);
     if (val.length < 2) {
-      setCompanySuggestions([]);
-      setShowDropdown(false);
+      setProviderSuggestions([]);
+      setShowProviderDropdown(false);
       return;
     }
 
-    setIsSearchingCompany(true);
+    setIsSearchingProvider(true);
     try {
       const res = await fetch(`/api/company-search?q=${encodeURIComponent(val)}`);
       const data = await res.json();
-      setCompanySuggestions(data);
-      setShowDropdown(data.length > 0);
+      setProviderSuggestions(data);
+      setShowProviderDropdown(data.length > 0);
     } catch (err) {
-      setCompanySuggestions([]);
+      setProviderSuggestions([]);
     } finally {
-      setIsSearchingCompany(false);
+      setIsSearchingProvider(false);
     }
   };
 
-  const selectCompany = (company: any) => {
+  const selectProviderCompany = (company: any) => {
+    setProviderName(company.name);
+    if (company.address) setProviderAddress(company.address);
+    if (company.companyNumber) setProviderVat(`VAT/Reg: ${company.companyNumber}`);
+    setProviderQuery(company.name);
+    setShowProviderDropdown(false);
+  };
+
+  // Client Search (Stap 3)
+  const handleClientSearch = async (val: string) => {
+    setClientQuery(val);
+    if (val.length < 2) {
+      setClientSuggestions([]);
+      setShowClientDropdown(false);
+      return;
+    }
+
+    setIsSearchingClient(true);
+    try {
+      const res = await fetch(`/api/company-search?q=${encodeURIComponent(val)}`);
+      const data = await res.json();
+      setClientSuggestions(data);
+      setShowClientDropdown(data.length > 0);
+    } catch (err) {
+      setClientSuggestions([]);
+    } finally {
+      setIsSearchingClient(false);
+    }
+  };
+
+  const selectClientCompany = (company: any) => {
     setClientCompany(company.name);
     setClientName(company.name);
     if (company.address) setClientAddress(company.address);
-    setCompanyQuery(company.name);
-    setShowDropdown(false);
+    setClientQuery(company.name);
+    setShowClientDropdown(false);
   };
 
-  // SMART AI ESTIMATOR ENGINE (Triggers & Moves to Step 2)
+  // SMART AI ESTIMATOR ENGINE
   const handleGenerate = () => {
     if (!prompt.trim()) return;
     setIsLoading(true);
@@ -143,8 +176,6 @@ export default function Home() {
       setScopeText(`Complete execution for: ${prompt}. Includes discovery, development, and finalized deliverables.`);
       setItems(generatedItems);
       setIsLoading(false);
-      
-      // Auto advance to Provider step!
       setCurrentStep(2);
     }, 1000);
   };
@@ -197,14 +228,12 @@ export default function Home() {
     <div className="min-h-screen bg-[#F8F9FA] text-[#111827] font-sans antialiased pb-32">
       <Script src="https://assets.lemonsqueezy.com/lemon.js" strategy="afterInteractive" onReady={handleLemonSqueezyScriptLoad} />
 
-      {/* HEADER */}
       <header className="bg-white border-b border-gray-200/80 px-8 py-4 flex justify-between items-center shadow-sm sticky top-0 z-40 backdrop-blur-md bg-white/90">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 bg-black rounded-lg flex items-center justify-center text-white font-black text-xs">Q</div>
           <span className="font-bold text-sm tracking-tight text-gray-900">QuoteBuilder</span>
         </div>
 
-        {/* WIZARD STEP INDICATOR */}
         <div className="flex items-center gap-2">
           {[1, 2, 3, 4].map((step) => (
             <button
@@ -226,14 +255,13 @@ export default function Home() {
 
       <main className="max-w-3xl mx-auto pt-10 px-6">
         
-        {/* HERO TITLE */}
         <div className="text-center mb-8 space-y-2">
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
             Your idea to a functional quote in seconds.
           </h1>
           <p className="text-sm text-gray-500 max-w-md mx-auto">
             {currentStep === 1 && "Describe your project or hourly rate to generate your quote."}
-            {currentStep === 2 && "Configure your business details and brand logo."}
+            {currentStep === 2 && "Search or enter your business details and brand logo."}
             {currentStep === 3 && "Select or type your client's company information."}
             {currentStep === 4 && "Review project line items, hours, and finalized totals."}
           </p>
@@ -266,7 +294,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* STEP 2: PROVIDER & BRAND DETAILS */}
+        {/* STEP 2: PROVIDER & BRAND DETAILS (Inclusief Smart Search voor eigen bedrijf) */}
         {currentStep === 2 && (
           <div className="space-y-6 animate-fade-in">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -289,9 +317,48 @@ export default function Home() {
                 )}
               </div>
 
-              {/* PROVIDER DETAILS */}
+              {/* PROVIDER DETAILS MET SMART SEARCH */}
               <div className="md:col-span-2 bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm space-y-3">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Your Business Details (Provider)</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Your Business Details (Provider)</span>
+                  <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">✨ Smart Company Search</span>
+                </div>
+
+                {/* PROVIDER AUTOCOMPLETE SEARCHBAR */}
+                <div className="relative">
+                  <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200 focus-within:border-black">
+                    <svg className="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input 
+                      value={providerQuery} 
+                      onChange={(e) => handleProviderSearch(e.target.value)} 
+                      onFocus={() => providerSuggestions.length > 0 && setShowProviderDropdown(true)}
+                      placeholder="Search your business (e.g. Studio Des, Acme Corp)..." 
+                      className="flex-1 bg-transparent text-xs font-medium outline-none text-gray-900 placeholder:text-gray-400"
+                    />
+                    {isSearchingProvider && <span className="text-[10px] text-gray-400 animate-pulse mr-2">Searching...</span>}
+                  </div>
+
+                  {showProviderDropdown && (
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-gray-100">
+                      {providerSuggestions.map((item, idx) => (
+                        <div 
+                          key={idx} 
+                          onClick={() => selectProviderCompany(item)}
+                          className="p-3 hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center"
+                        >
+                          <div>
+                            <div className="text-xs font-bold text-gray-900">{item.name}</div>
+                            <div className="text-[10px] text-gray-400 truncate max-w-xs">{item.address}</div>
+                          </div>
+                          <span className="text-[9px] bg-gray-100 text-gray-600 font-mono px-1.5 py-0.5 rounded">{item.jurisdiction}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-2 gap-2">
                   <input value={providerName} onChange={(e) => setProviderName(e.target.value)} placeholder="Company Name" className="bg-gray-50 border border-gray-200 rounded-xl p-2 text-xs font-semibold outline-none focus:border-black" />
                   <input value={providerEmail} onChange={(e) => setProviderEmail(e.target.value)} placeholder="Email" className="bg-gray-50 border border-gray-200 rounded-xl p-2 text-xs outline-none focus:border-black" />
@@ -318,28 +385,28 @@ export default function Home() {
                 <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">✨ Smart Company Search</span>
               </div>
 
-              {/* SMART AUTOCOMPLETE SEARCHBAR */}
+              {/* CLIENT AUTOCOMPLETE SEARCHBAR */}
               <div className="relative">
                 <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200 focus-within:border-black">
                   <svg className="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                   <input 
-                    value={companyQuery} 
-                    onChange={(e) => handleCompanySearch(e.target.value)} 
-                    onFocus={() => companySuggestions.length > 0 && setShowDropdown(true)}
+                    value={clientQuery} 
+                    onChange={(e) => handleClientSearch(e.target.value)} 
+                    onFocus={() => clientSuggestions.length > 0 && setShowClientDropdown(true)}
                     placeholder="Type client company name (e.g. Acme Corp, Mollie, Bol)..." 
                     className="flex-1 bg-transparent text-xs font-medium outline-none text-gray-900 placeholder:text-gray-400"
                   />
-                  {isSearchingCompany && <span className="text-[10px] text-gray-400 animate-pulse mr-2">Searching...</span>}
+                  {isSearchingClient && <span className="text-[10px] text-gray-400 animate-pulse mr-2">Searching...</span>}
                 </div>
 
-                {showDropdown && (
+                {showClientDropdown && (
                   <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-gray-100">
-                    {companySuggestions.map((item, idx) => (
+                    {clientSuggestions.map((item, idx) => (
                       <div 
                         key={idx} 
-                        onClick={() => selectCompany(item)}
+                        onClick={() => selectClientCompany(item)}
                         className="p-3 hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center"
                       >
                         <div>
@@ -372,13 +439,11 @@ export default function Home() {
         {/* STEP 4: SCOPE, PRICING & DOWNLOAD */}
         {currentStep === 4 && (
           <div className="space-y-6 animate-fade-in">
-            {/* SCOPE OBJECTIVES */}
             <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm">
               <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Project Scope & Objectives</label>
               <textarea value={scopeText} onChange={(e) => setScopeText(e.target.value)} rows={2} placeholder="Detailed description of the project scope..." className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium outline-none focus:border-black resize-none" />
             </div>
 
-            {/* DYNAMIC LINE ITEMS & TOTALS */}
             <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center border-b border-gray-100 pb-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Project Hours & Hourly Rates</span>
@@ -428,7 +493,7 @@ export default function Home() {
 
       </main>
 
-      {/* ACTION BAR (Verschijnt vanaf stap 2, 3 en 4) */}
+      {/* ACTION BAR (Zichtbaar op Stap 2, 3 en 4) */}
       {currentStep > 1 && (
         <div className="fixed bottom-6 inset-x-0 z-50 flex justify-center px-6">
           <div className="bg-white/90 backdrop-blur-xl border border-gray-200/80 p-3 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md w-full justify-between">
