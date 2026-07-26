@@ -304,10 +304,30 @@ export default function Home() {
         
         {/* STEP 1: TITLE, SUBTITLE & SEARCH GROUPED IN CENTER WITH HUE SHIFT GLOW */}
         {currentStep === 1 && (
-          <div className="my-auto space-y-10 relative">
+          <div className="my-auto space-y-8 relative">
             
             {/* SUBTLE HUE-SHIFTING AMBIENT GLOW BACKDROP */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[160%] bg-gradient-to-tr from-sky-200/50 via-indigo-200/40 to-cyan-200/50 blur-3xl rounded-full pointer-events-none animate-pulse -z-10" />
+
+            {/* TRUSTPILOT-STYLE SOCIAL PROOF RATING BADGE */}
+            <div className="flex justify-center">
+              <div className="inline-flex items-center gap-2.5 bg-white/90 border border-gray-200/80 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-xs hover:border-gray-300 transition-all cursor-default">
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <div key={star} className="w-4 h-4 bg-[#00B67A] rounded-xs flex items-center justify-center">
+                      <svg className="w-2.5 h-2.5 text-white fill-current" viewBox="0 0 24 24">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                      </svg>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-900">
+                  <span>4.8/5</span>
+                  <span className="text-gray-300">•</span>
+                  <span className="text-gray-500 font-normal">Over 120+ quotes generated</span>
+                </div>
+              </div>
+            </div>
 
             <div className="text-center space-y-2">
               <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
