@@ -8,90 +8,88 @@ export async function GET(req: Request) {
     return NextResponse.json([]);
   }
 
-  // 1. Clean query for Belgian corporate suffix variations
+  // Strippen van haakjes en veelvoorkomende Belgische/EU rechtspersonen voor een schonere zoekopdracht
   const cleanQuery = rawQuery.replace(/[()]/g, '').trim();
-  const baseName = cleanQuery.replace(/\b(commv|bvba|bv|nv|vof|cv|vzw|ltd|inc|llc|gmbh)\b/gi, '').trim();
-  const queryToSearch = baseName.length >= 2 ? baseName : cleanQuery;
+  const baseName = cleanQuery.replace(/\b(commv|bvba|bv|nv|vof|cv|vzw|ltd|inc|llc|gmbh|sarl)\b/gi, '').trim();
+  const queryToUse = baseName.length >= 2 ? baseName : cleanQuery;
 
   try {
     const results: any[] = [];
 
-    // 2. DIRECT SPARQL QUERY TO WIKIDATA'S BELGIAN ENTERPRISE DATASET
-    // P2762 = Belgian CBE/KBO enterprise number
-    // Q31 = Belgium jurisdiction
-    const sparqlQuery = `
-      SELECT DISTINCT ?item ?itemLabel ?cbeNumber ?addressLabel WHERE {
-        {
-          ?item wdt:P31/wdt:P279* wd:Q4830453 . # Business / Enterprise
-          ?item wdt:P17 wd:Q31 .               # Located in Belgium
-          ?item rdfs:label ?itemLabel .
-          FILTER(CONTAINS(LOWER(?itemLabel), LOWER("${queryToSearch}")))
-        }
-        UNION
-        {
-          ?item wdt:P2762 ?cbeNumber .         # Match directly on KBO/CBE number
-          FILTER(CONTAINS(?cbeNumber, "${queryToSearch}"))
-        }
-        OPTIONAL { ?item wdt:P2762 ?cbeNumber . }
-        OPTIONAL { ?item wdt:P6375 ?addressLabel . }
-        FILTER(LANG(?itemLabel) = "en" || LANG(?itemLabel) = "nl" || LANG(?itemLabel) = "fr")
-      }
-      LIMIT 6
-    `;
+    // 1. DRECT BELGISCH KBO & EU REGISTER (Via Publieke OpenData API Endpoint)
+    try {
+      const kboRes = await fetch(
+        `https://kbodata.app/api/v1/companies/search?q=${encodeURIComponent(queryToUse)}`,
+        { headers: { 'Accept': 'application/json' } }
+      );
 
-    const wikidataUrl = `https://query.wikidata.org/sparql?query=${encodeURIComponent(sparqlQuery)}&format=json`;
+      if (kboRes.ok) {
+        const kboData = await kboRes.json();
+        const items = Array.isArray(kboData) ? kboData : (kboData.results || kboData.data || []);
 
-    const sparqlRes = await fetch(wikidataUrl, {
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'QuoteBuilderApp/1.0 (https://quotebuilder.app; contact@quotebuilder.app)'
-      }
-    });
-
-    if (sparqlRes.ok) {
-      const sparqlData = await sparqlRes.json();
-      const bindings = sparqlData.results?.bindings || [];
-
-      bindings.forEach((b: any) => {
-        const rawCbe = b.cbeNumber?.value || '';
-        const formattedVat = rawCbe ? `BE ${rawCbe.replace(/[^0-9]/g, '')}` : 'BE (Registered)';
-
-        results.push({
-          name: b.itemLabel?.value || queryToSearch,
-          address: b.addressLabel?.value || 'Belgium',
-          companyNumber: formattedVat,
-          jurisdiction: 'BE',
-        });
-      });
-    }
-
-    // 3. FALLBACK: WIKIDATA SEARCH API (Catches Belgian companies without explicit SPARQL tags)
-    if (results.length === 0) {
-      const fallbackUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(queryToSearch)}&language=nl&format=json&type=item&limit=5`;
-      const fallbackRes = await fetch(fallbackUrl);
-
-      if (fallbackRes.ok) {
-        const fallbackData = await fallbackRes.json();
-        const searchItems = fallbackData.search || [];
-
-        searchItems.forEach((item: any) => {
+        items.slice(0, 5).forEach((item: any) => {
+          const vatNum = item.vatNumber || item.kboNumber || item.enterpriseNumber;
+          const formattedVat = vatNum ? `BE ${vatNum.toString().replace(/[^0-9]/g, '')}` : 'BE (KBO Registered)';
+          
           results.push({
-            name: item.label,
-            address: item.description || 'Belgian Registered Entity',
-            companyNumber: `BE (${item.id})`,
+            name: item.name || item.companyName,
+            address: item.address 
+              ? `${item.address.street || ''} ${item.address.zip || ''} ${item.address.city || ''}`.trim() 
+              : (item.city ? `${item.zip || ''} ${item.city}` : 'Belgium'),
+            companyNumber: formattedVat,
             jurisdiction: 'BE',
           });
         });
       }
+    } catch (e) {
+      // Stilzwijgend doorgaan naar fallback bij time-out
     }
 
-    // Deduplicate results by company name
-    const uniqueResults = Array.from(new Set(results.map(r => r.name)))
-      .map(name => results.find(r => r.name === name));
+    // 2. WIKIDATA DIRECT SEARCH (Aangescherpt op bedrijven & organisaties)
+    if (results.length < 3) {
+      try {
+        const wikiUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(queryToUse)}&language=nl&format=json&type=item&limit=8`;
+        const wikiRes = await fetch(wikiUrl);
 
-    return NextResponse.json(uniqueResults);
+        if (wikiRes.ok) {
+          const wikiData = await wikiRes.json();
+          const searchItems = wikiData.search || [];
+
+          searchItems.forEach((item: any) => {
+            const desc = (item.description || '').toLowerCase();
+            
+            // Controleer of de beschrijving duidt op een bedrijf/organisatie en sluit willekeurige dingen uit
+            const isCompany = desc.includes('bedrijf') || desc.includes('company') || desc.includes('onderneming') || 
+                              desc.includes('organisatie') || desc.includes('corporation') || desc.includes('firm') ||
+                              desc.includes('bv') || desc.includes('nv') || desc.includes('inc') || desc.includes('ltd');
+
+            if (isCompany || searchItems.length <= 2) {
+              results.push({
+                name: item.label,
+                address: item.description || 'Registered Entity',
+                companyNumber: `EU / ${item.id}`,
+                jurisdiction: 'EU',
+              });
+            }
+          });
+        }
+      } catch (e) {}
+    }
+
+    // 3. UNIEKE BEDRIJVEN FILTEREN & DEDUPLICEREN
+    const uniqueMap = new Map();
+    results.forEach(r => {
+      const normalizedName = r.name.toLowerCase().trim();
+      if (!uniqueMap.has(normalizedName)) {
+        uniqueMap.set(normalizedName, r);
+      }
+    });
+
+    const finalResults = Array.from(uniqueMap.values()).slice(0, 5);
+
+    return NextResponse.json(finalResults);
   } catch (error) {
-    console.error('Company search error:', error);
+    console.error('API Search Error:', error);
     return NextResponse.json([]);
   }
 }

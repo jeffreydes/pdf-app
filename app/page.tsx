@@ -269,11 +269,11 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#111827] font-sans antialiased flex flex-col justify-between">
+    <div className="min-h-screen bg-[#F8F9FA] text-[#111827] font-sans antialiased flex flex-col justify-between overflow-x-hidden">
       <Script src="https://assets.lemonsqueezy.com/lemon.js" strategy="afterInteractive" onReady={handleLemonSqueezyScriptLoad} />
 
       {/* HEADER */}
-      <header className="bg-white border-b border-gray-200/80 px-8 py-4 flex justify-between items-center shadow-sm sticky top-0 z-40 backdrop-blur-md bg-white/90">
+      <header className="bg-white/80 border-b border-gray-200/80 px-8 py-4 flex justify-between items-center shadow-sm sticky top-0 z-50 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 bg-black rounded-lg flex items-center justify-center text-white font-black text-xs">Q</div>
           <span className="font-bold text-sm tracking-tight text-gray-900">QuoteBuilder</span>
@@ -299,23 +299,27 @@ export default function Home() {
         </div>
       </header>
 
-      {/* CENTERED MAIN CONTENT CONTAINER */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-6 py-8 flex flex-col justify-center min-h-[calc(100vh-80px)]">
+      {/* MAIN CONTAINER LOCKED TO SCREEN HEIGHT FOR PERFECT CENTERING */}
+      <main className="flex-1 max-w-3xl w-full mx-auto px-6 flex flex-col justify-between min-h-[calc(100vh-80px)] relative z-10">
         
-        {/* STEP 1: TITLE, SUBTITLE & SEARCH GROUPED IN CENTER WITH ANIMATIONS */}
+        {/* STEP 1: TITLE, SUBTITLE & SEARCH GROUPED IN CENTER WITH HUE SHIFT GLOW */}
         {currentStep === 1 && (
-          <div className="my-auto space-y-8 animate-fade-in">
-            <div className="text-center space-y-2 transition-all duration-700 ease-out">
-              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 animate-slide-up">
+          <div className="my-auto space-y-10 relative">
+            
+            {/* SUBTLE HUE-SHIFTING AMBIENT GLOW BACKDROP */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[160%] bg-gradient-to-tr from-sky-200/50 via-indigo-200/40 to-cyan-200/50 blur-3xl rounded-full pointer-events-none animate-pulse -z-10" />
+
+            <div className="text-center space-y-2">
+              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
                 Your idea to a functional quote in seconds.
               </h1>
-              <p className="text-sm text-gray-500 max-w-md mx-auto animate-fade-in delay-150">
+              <p className="text-sm text-gray-500 max-w-md mx-auto">
                 Describe your project or hourly rate to generate your quote.
               </p>
             </div>
 
-            <div className="relative animate-slide-up delay-200">
-              <div className="bg-white border border-gray-200 rounded-2xl p-2 shadow-lg hover:border-gray-300 transition-all flex items-center gap-3 focus-within:ring-2 focus-within:ring-black">
+            <div className="relative">
+              <div className="bg-white/90 backdrop-blur-md border border-gray-200/80 rounded-2xl p-2 shadow-xl hover:border-gray-300 transition-all flex items-center gap-3 focus-within:ring-2 focus-within:ring-black">
                 <svg className="w-5 h-5 text-gray-400 ml-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
@@ -338,7 +342,7 @@ export default function Home() {
               </div>
 
               {/* PROGRAMMATIC SEO PRESET CHIPS */}
-              <div className="flex flex-wrap items-center justify-center gap-2 mt-3 animate-fade-in delay-300">
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
                 <span className="text-[11px] text-gray-400 font-medium">Quick Presets:</span>
                 {[
                   { label: "Web Design Project", query: "Web design & development, rate 85" },
@@ -352,7 +356,7 @@ export default function Home() {
                       setPrompt(chip.query);
                       handleGenerate(chip.query);
                     }}
-                    className="text-[11px] bg-white border border-gray-200 hover:border-gray-400 text-gray-600 rounded-lg px-2.5 py-1 transition-all active:scale-95"
+                    className="text-[11px] bg-white/80 border border-gray-200 hover:border-gray-400 text-gray-600 rounded-lg px-2.5 py-1 transition-all active:scale-95 shadow-xs"
                   >
                     + {chip.label}
                   </button>
@@ -361,7 +365,7 @@ export default function Home() {
             </div>
 
             {/* ORGANIC TRACTION / SEO HIGHLIGHTS WITH ANIMATED ICONS */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-gray-200/60 text-center animate-fade-in delay-500">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-gray-200/60 text-center">
               
               {/* Feature 1: AI Estimation */}
               <div className="group flex flex-col items-center space-y-2 cursor-pointer">
@@ -408,7 +412,7 @@ export default function Home() {
 
         {/* STEPS 2, 3, & 4 HERO TITLE HEADER */}
         {currentStep > 1 && (
-          <div className="text-center mb-8 space-y-2 animate-fade-in">
+          <div className="text-center my-6 space-y-2">
             <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
               Your idea to a functional quote in seconds.
             </h1>
@@ -422,7 +426,7 @@ export default function Home() {
 
         {/* STEP 2: PROVIDER & BRAND DETAILS */}
         {currentStep === 2 && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6 my-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px]">
                 <div>
@@ -501,7 +505,7 @@ export default function Home() {
 
         {/* STEP 3: CLIENT & TIMELINE DETAILS */}
         {currentStep === 3 && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6 my-auto">
             <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Client & Timeline Details</span>
@@ -560,7 +564,7 @@ export default function Home() {
 
         {/* STEP 4: SCOPE, PRICING & IN-BOX MONETIZATION BUTTONS */}
         {currentStep === 4 && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6 my-auto">
             <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm">
               <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Project Scope & Objectives</label>
               <textarea value={scopeText} onChange={(e) => setScopeText(e.target.value)} rows={2} placeholder="Detailed description of the project scope..." className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium outline-none focus:border-black resize-none" />
@@ -656,7 +660,7 @@ export default function Home() {
                     href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
                     className="lemonsqueezy-button flex-1 sm:flex-none py-3 px-5 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
                   >
-                    Download Full PDF
+                    Download Full PDF (€4.99)
                   </a>
                 </div>
               </div>
@@ -668,34 +672,40 @@ export default function Home() {
           </div>
         )}
 
-        {/* SEO FAQ ACCORDION SECTION */}
-        <section className="mt-20 pt-10 border-t border-gray-200/80 mb-20 animate-fade-in">
-          <div className="text-center mb-8 space-y-1">
-            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Frequently Asked Questions</h2>
-            <p className="text-xs text-gray-500">Everything you need to know about building official quotes.</p>
+      </main>
+
+      {/* COMPACT & LOW-PROFILE FAQ AT THE VERY BOTTOM BELOW THE FOLD */}
+      <footer className="w-full bg-white border-t border-gray-200/60 py-16 mt-20 relative z-20">
+        <div className="max-w-2xl mx-auto px-6 space-y-6">
+          <div className="text-center space-y-1">
+            <h2 className="text-lg font-bold text-gray-900 tracking-tight">Frequently Asked Questions</h2>
+            <p className="text-xs text-gray-400">Everything you need to know about generating official quotes.</p>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {faqs.map((faq, idx) => (
-              <div key={idx} className="bg-white border border-gray-200/80 rounded-2xl overflow-hidden shadow-sm transition-all">
+              <div key={idx} className="border border-gray-100 rounded-xl overflow-hidden bg-gray-50/50">
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full text-left p-4 text-xs font-bold text-gray-900 flex justify-between items-center hover:bg-gray-50"
+                  className="w-full text-left p-3.5 text-xs font-semibold text-gray-800 flex justify-between items-center hover:bg-gray-100/60 transition-colors"
                 >
                   <span>{faq.q}</span>
-                  <span className="text-gray-400 font-mono text-sm ml-2">{openFaq === idx ? '−' : '+'}</span>
+                  <span className="text-gray-400 text-xs ml-2">{openFaq === idx ? '−' : '+'}</span>
                 </button>
                 {openFaq === idx && (
-                  <div className="px-4 pb-4 text-xs text-gray-500 leading-relaxed border-t border-gray-100 pt-3 bg-gray-50/50 animate-fade-in">
+                  <div className="px-3.5 pb-3.5 text-[11px] text-gray-500 leading-relaxed border-t border-gray-100 pt-2 bg-white">
                     {faq.a}
                   </div>
                 )}
               </div>
             ))}
           </div>
-        </section>
 
-      </main>
+          <div className="text-center text-[10px] text-gray-400 pt-4">
+            © {new Date().getFullYear()} QuoteBuilder. All rights reserved.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
