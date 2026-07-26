@@ -289,8 +289,7 @@ export default function Home() {
         
         {/* STEP 1: TITLE, SUBTITLE & SEARCH GROUPED IN CENTER */}
         {currentStep === 1 && (
-          <div className="my-auto space-y-8 animate-fade-in">
-            {/* HERO TITLE */}
+          <div className="my-auto space-y-8">
             <div className="text-center space-y-2">
               <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
                 Your idea to a functional quote in seconds.
@@ -300,7 +299,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* PROMPT SEARCH BAR */}
             <div className="relative">
               <div className="bg-white border border-gray-200 rounded-2xl p-2 shadow-lg hover:border-gray-300 transition-all flex items-center gap-3 focus-within:ring-2 focus-within:ring-black">
                 <svg className="w-5 h-5 text-gray-400 ml-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -378,7 +376,7 @@ export default function Home() {
                       value={providerQuery} 
                       onChange={(e) => handleProviderSearch(e.target.value)} 
                       onFocus={() => providerSuggestions.length > 0 && setShowProviderDropdown(true)}
-                      placeholder="Search your business (e.g. bol, Acme Corp)..." 
+                      placeholder="Search your business (e.g. Studio Des, Acme Corp)..." 
                       className="flex-1 bg-transparent text-xs font-medium outline-none text-gray-900 placeholder:text-gray-400"
                     />
                     {isSearchingProvider && <span className="text-[10px] text-gray-400 animate-pulse mr-2">Searching...</span>}
@@ -595,3 +593,6 @@ export default function Home() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
