@@ -10,29 +10,24 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
     
-    // Dates & Quote Tracking
     const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     const quoteNumber = `QT-${Math.floor(100000 + Math.random() * 900000)}`;
 
-    // Client Info
     const clientName = data.clientName || 'Valued Client';
     const clientCompany = data.clientCompany || '';
     const clientAddress = data.clientAddress || 'Billing Address';
     const clientEmail = data.clientEmail || '';
 
-    // Provider Info
     const providerName = data.providerName || 'Your Company Name';
     const providerAddress = data.providerAddress || '123 Business St, City';
     const providerPhone = data.providerPhone || '+1 (555) 000-0000';
     const providerEmail = data.providerEmail || 'contact@yourcompany.com';
     const providerVat = data.providerVat || 'VAT: EU123456789B01';
 
-    // Timeline & Terms
     const projectTimeline = data.projectTimeline || 'Expected start: Upon approval. Est. completion: 4 weeks.';
     const scopeText = data.scopeText || data.prompt || 'Services and deliverables as specified in the proposal agreement.';
 
-    // Dynamic Line Items & Pricing
     const items: LineItem[] = data.items && data.items.length > 0 
       ? data.items 
       : [{ description: 'Project Scope Execution', qty: 10, price: 85 }];
@@ -102,14 +97,12 @@ export async function POST(req: Request) {
             .quote-meta { font-size: 8.5pt; color: #4B5563; text-align: right; margin-top: 2mm; }
 
             .details-grid { display: flex; justify-content: space-between; margin-bottom: 8mm; }
-
             .details-block { width: 48%; }
             .details-block h4 {
               font-size: 8pt; font-weight: 700; text-transform: uppercase;
               letter-spacing: 0.5px; color: #6B7280; margin: 0 0 2mm 0;
             }
             .details-block p { margin: 0; font-size: 9pt; color: #374151; }
-            .details-block strong { color: #111827; font-[600]; }
 
             .summary-box {
               background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 6px;
@@ -141,18 +134,23 @@ export async function POST(req: Request) {
               display: flex; justify-content: space-between; gap: 6mm;
               border-top: 1px solid #E5E7EB; padding-top: 5mm; margin-bottom: 6mm;
             }
-            .terms-box { width: 50%; font-size: 8pt; color: #6B7280; }
+            .terms-box { width: 48%; font-size: 8pt; color: #6B7280; }
             .terms-box h5 { margin: 0 0 1mm 0; font-size: 8pt; font-weight: 700; color: #374151; }
 
-            /* SIGN-OFF BLOCK */
+            /* SIGN-OFF BLOCK CORRECTION */
             .signoff-container {
-              border: 1px solid #E5E7EB; border-radius: 6px; padding: 4mm 5mm;
-              background: #FAFAFA; display: flex; justify-between; align-items: flex-end;
+              border: 1px solid #E5E7EB; border-radius: 6px; padding: 5mm 6mm;
+              background: #FAFAFA; display: flex; justify-content: space-between; gap: 10mm;
             }
-            .signoff-box { width: 45%; }
-            .signoff-title { font-size: 8pt; font-weight: 700; uppercase; color: #374151; margin-bottom: 8mm; }
-            .signoff-line { border-bottom: 1px solid #9CA3AF; margin-bottom: 1.5mm; }
-            .signoff-sub { font-size: 7.5pt; color: #6B7280; display: flex; justify-content: space-between; }
+            .signoff-box { width: 48%; }
+            .signoff-title { font-size: 8pt; font-weight: 700; text-transform: uppercase; color: #374151; margin-bottom: 10mm; }
+            
+            .signoff-lines {
+              display: flex; justify-content: space-between; gap: 4mm;
+            }
+            .signoff-field { flex: 1; }
+            .signoff-line { border-bottom: 1px solid #9CA3AF; height: 1px; margin-bottom: 1.5mm; }
+            .signoff-label { font-size: 7.5pt; color: #6B7280; }
 
             .watermark {
               position: fixed; top: 50%; left: 50%;
@@ -165,7 +163,6 @@ export async function POST(req: Request) {
         <body>
           ${watermarkHtml}
           
-          <!-- HEADER -->
           <div class="header">
             <div>
               ${logoHtml ? logoHtml : `<h2 style="margin:0; font-weight:800; font-size:16pt;">${providerName.toUpperCase()}</h2>`}
@@ -185,7 +182,6 @@ export async function POST(req: Request) {
             </div>
           </div>
 
-          <!-- CLIENT & PROVIDER DETAILS -->
           <div class="details-grid">
             <div class="details-block">
               <h4>PREPARED FOR (CLIENT):</h4>
@@ -199,13 +195,11 @@ export async function POST(req: Request) {
             </div>
           </div>
 
-          <!-- SUMMARY & SCOPE -->
           <div class="summary-box">
             <h3>Project Scope & Objectives</h3>
             <p>${scopeText}</p>
           </div>
 
-          <!-- ITEMIZED TABLE -->
           <table class="items-table">
             <thead>
               <tr>
@@ -220,7 +214,6 @@ export async function POST(req: Request) {
             </tbody>
           </table>
 
-          <!-- TOTALS -->
           <div class="totals-container">
             <table class="totals-table">
               <tr>
@@ -238,7 +231,6 @@ export async function POST(req: Request) {
             </table>
           </div>
 
-          <!-- TERMS & CONDITIONS -->
           <div class="terms-grid">
             <div class="terms-box">
               <h5>Payment Terms</h5>
@@ -250,22 +242,33 @@ export async function POST(req: Request) {
             </div>
           </div>
 
-          <!-- SIGN-OFF & ACCEPTANCE -->
+          <!-- SIGN-OFF BLOCK CORRECTION -->
           <div class="signoff-container">
             <div class="signoff-box">
               <div class="signoff-title">CLIENT APPROVAL & SIGNATURE</div>
-              <div class="signoff-line"></div>
-              <div class="signoff-sub">
-                <span>Authorized Signature</span>
-                <span>Date</span>
+              <div class="signoff-lines">
+                <div class="signoff-field" style="flex:2;">
+                  <div class="signoff-line"></div>
+                  <div class="signoff-label">Authorized Signature</div>
+                </div>
+                <div class="signoff-field" style="flex:1;">
+                  <div class="signoff-line"></div>
+                  <div class="signoff-label">Date</div>
+                </div>
               </div>
             </div>
+
             <div class="signoff-box">
-              <div class="signoff-title">PROVIDER CONFIRMATION</div>
-              <div class="signoff-line"></div>
-              <div class="signoff-sub">
-                <span>${providerName}</span>
-                <span>Date</span>
+              <div class="signoff-title">PROVIDER CONFIRMATION (${providerName})</div>
+              <div class="signoff-lines">
+                <div class="signoff-field" style="flex:2;">
+                  <div class="signoff-line"></div>
+                  <div class="signoff-label">Authorized Signature</div>
+                </div>
+                <div class="signoff-field" style="flex:1;">
+                  <div class="signoff-line"></div>
+                  <div class="signoff-label">Date</div>
+                </div>
               </div>
             </div>
           </div>

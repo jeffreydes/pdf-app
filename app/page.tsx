@@ -15,16 +15,17 @@ export default function Home() {
 
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloadingFree, setIsDownloadingFree] = useState(false);
   const [hasPaid, setHasPaid] = useState(false);
   const [logo, setLogo] = useState<string | null>(null);
 
-  // Provider Smart Company Search States (Stap 2)
+  // Provider Smart Search
   const [providerQuery, setProviderQuery] = useState('');
   const [providerSuggestions, setProviderSuggestions] = useState<any[]>([]);
   const [isSearchingProvider, setIsSearchingProvider] = useState(false);
   const [showProviderDropdown, setShowProviderDropdown] = useState(false);
 
-  // Client Smart Company Search States (Stap 3)
+  // Client Smart Search
   const [clientQuery, setClientQuery] = useState('');
   const [clientSuggestions, setClientSuggestions] = useState<any[]>([]);
   const [isSearchingClient, setIsSearchingClient] = useState(false);
@@ -201,6 +202,7 @@ export default function Home() {
   };
 
   const downloadPdf = async (isWatermarked: boolean) => {
+    if (isWatermarked) setIsDownloadingFree(true);
     try {
       const payload = {
         prompt, logo, clientName, clientCompany, clientAddress, clientEmail,
@@ -221,19 +223,25 @@ export default function Home() {
       a.href = url;
       a.download = isWatermarked ? 'Draft_Preview_Quote.pdf' : 'Official_Quote.pdf';
       a.click();
-    } catch (error: any) { alert('Error: ' + error.message); }
+    } catch (error: any) { 
+      alert('Error: ' + error.message); 
+    } finally {
+      if (isWatermarked) setIsDownloadingFree(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-[#111827] font-sans antialiased pb-32">
+    <div className="min-h-screen bg-[#F8F9FA] text-[#111827] font-sans antialiased flex flex-col justify-between">
       <Script src="https://assets.lemonsqueezy.com/lemon.js" strategy="afterInteractive" onReady={handleLemonSqueezyScriptLoad} />
 
+      {/* HEADER */}
       <header className="bg-white border-b border-gray-200/80 px-8 py-4 flex justify-between items-center shadow-sm sticky top-0 z-40 backdrop-blur-md bg-white/90">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 bg-black rounded-lg flex items-center justify-center text-white font-black text-xs">Q</div>
           <span className="font-bold text-sm tracking-tight text-gray-900">QuoteBuilder</span>
         </div>
 
+        {/* WIZARD STEP INDICATOR */}
         <div className="flex items-center gap-2">
           {[1, 2, 3, 4].map((step) => (
             <button
@@ -253,8 +261,10 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto pt-10 px-6">
+      {/* CENTERED MAIN CONTENT CONTAINER */}
+      <main className="flex-1 max-w-3xl w-full mx-auto px-6 py-8 flex flex-col justify-center min-h-[calc(100vh-80px)]">
         
+        {/* HERO TITLE */}
         <div className="text-center mb-8 space-y-2">
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
             Your idea to a functional quote in seconds.
@@ -269,7 +279,7 @@ export default function Home() {
 
         {/* STEP 1: PROMPT SEARCH BAR */}
         {currentStep === 1 && (
-          <div className="relative animate-fade-in">
+          <div className="relative my-auto">
             <div className="bg-white border border-gray-200 rounded-2xl p-2 shadow-lg hover:border-gray-300 transition-all flex items-center gap-3 focus-within:ring-2 focus-within:ring-black">
               <svg className="w-5 h-5 text-gray-400 ml-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -294,11 +304,10 @@ export default function Home() {
           </div>
         )}
 
-        {/* STEP 2: PROVIDER & BRAND DETAILS (Inclusief Smart Search voor eigen bedrijf) */}
+        {/* STEP 2: PROVIDER & BRAND DETAILS */}
         {currentStep === 2 && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* LOGO */}
               <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px]">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-1">Brand Logo</span>
@@ -317,14 +326,12 @@ export default function Home() {
                 )}
               </div>
 
-              {/* PROVIDER DETAILS MET SMART SEARCH */}
               <div className="md:col-span-2 bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Your Business Details (Provider)</span>
                   <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">✨ Smart Company Search</span>
                 </div>
 
-                {/* PROVIDER AUTOCOMPLETE SEARCHBAR */}
                 <div className="relative">
                   <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200 focus-within:border-black">
                     <svg className="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -378,14 +385,13 @@ export default function Home() {
 
         {/* STEP 3: CLIENT & TIMELINE DETAILS */}
         {currentStep === 3 && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6">
             <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Client & Timeline Details</span>
                 <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">✨ Smart Company Search</span>
               </div>
 
-              {/* CLIENT AUTOCOMPLETE SEARCHBAR */}
               <div className="relative">
                 <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200 focus-within:border-black">
                   <svg className="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -438,7 +444,7 @@ export default function Home() {
 
         {/* STEP 4: SCOPE, PRICING & DOWNLOAD */}
         {currentStep === 4 && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-6">
             <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm">
               <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Project Scope & Objectives</label>
               <textarea value={scopeText} onChange={(e) => setScopeText(e.target.value)} rows={2} placeholder="Detailed description of the project scope..." className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium outline-none focus:border-black resize-none" />
@@ -485,7 +491,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex justify-between pt-4">
+            <div className="flex justify-between pt-4 pb-12">
               <button onClick={() => setCurrentStep(3)} className="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-bold hover:bg-gray-100">← Back</button>
             </div>
           </div>
@@ -493,15 +499,40 @@ export default function Home() {
 
       </main>
 
-      {/* ACTION BAR (Zichtbaar op Stap 2, 3 en 4) */}
+      {/* ACTION BAR WITH FREE DOWNLOAD + LOADING SPINNER */}
       {currentStep > 1 && (
         <div className="fixed bottom-6 inset-x-0 z-50 flex justify-center px-6">
           <div className="bg-white/90 backdrop-blur-xl border border-gray-200/80 p-3 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md w-full justify-between">
-            <button onClick={() => downloadPdf(true)} className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95 text-center">Preview Draft</button>
-            <a href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" className="lemonsqueezy-button flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer">Download Full PDF</a>
+            
+            {/* DOWNLOAD FREE QUOTE WITH LOADING SPINNER */}
+            <button 
+              onClick={() => downloadPdf(true)}
+              disabled={isDownloadingFree}
+              className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95 text-center flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {isDownloadingFree ? (
+                <>
+                  <svg className="animate-spin h-3.5 w-3.5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Downloading...</span>
+                </>
+              ) : (
+                'Download free quote'
+              )}
+            </button>
+
+            {/* DOWNLOAD FULL PDF */}
+            <a 
+              href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
+              className="lemonsqueezy-button flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
+            >
+              Download Full PDF
+            </a>
           </div>
         </div>
       )}
     </div>
   );
-}
+}<
