@@ -10,30 +10,38 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
     
-    // Dates & Quote details
+    // Dates & Quote Tracking
     const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     const quoteNumber = `QT-${Math.floor(100000 + Math.random() * 900000)}`;
 
-    // Input values with fallbacks
+    // Client Info
     const clientName = data.clientName || 'Valued Client';
-    const clientMeta = data.clientMeta || 'Requested via Quote Generator';
+    const clientCompany = data.clientCompany || '';
+    const clientAddress = data.clientAddress || 'Billing Address';
+    const clientEmail = data.clientEmail || '';
+
+    // Provider Info
     const providerName = data.providerName || 'Your Company Name';
+    const providerAddress = data.providerAddress || '123 Business St, City';
+    const providerPhone = data.providerPhone || '+1 (555) 000-0000';
     const providerEmail = data.providerEmail || 'contact@yourcompany.com';
+    const providerVat = data.providerVat || 'VAT: EU123456789B01';
+
+    // Timeline & Terms
+    const projectTimeline = data.projectTimeline || 'Expected start: Upon approval. Est. completion: 4 weeks.';
     const scopeText = data.scopeText || data.prompt || 'Services and deliverables as specified in the proposal agreement.';
 
-    // Dynamic Line Items Calculations (Qty = Hours, Price = Hourly Rate)
+    // Dynamic Line Items & Pricing
     const items: LineItem[] = data.items && data.items.length > 0 
       ? data.items 
       : [{ description: 'Project Scope Execution', qty: 10, price: 85 }];
 
     const vatRate = parseFloat(data.vatRate) || 21;
-
     const subtotal = items.reduce((acc, item) => acc + (item.qty * item.price), 0);
     const vatAmount = subtotal * (vatRate / 100);
     const totalDue = subtotal + vatAmount;
 
-    // Formatting currency
     const formatCurrency = (amount: number) => 
       new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
 
@@ -52,12 +60,9 @@ export async function POST(req: Request) {
       ? `<div class="watermark">PREVIEW DRAFT</div>` 
       : '';
 
-    // Generate Table Rows Dynamically
     const tableRowsHtml = items.map(item => `
       <tr>
-        <td>
-          <strong>${item.description}</strong>
-        </td>
+        <td><strong>${item.description}</strong></td>
         <td class="text-center">${item.qty} hrs</td>
         <td class="text-right">${formatCurrency(item.price)} / hr</td>
         <td class="text-right">${formatCurrency(item.qty * item.price)}</td>
@@ -71,211 +76,136 @@ export async function POST(req: Request) {
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-            @page { 
-              size: A4; 
-              margin: 20mm; 
-            }
+            @page { size: A4; margin: 18mm 20mm; }
             * { box-sizing: border-box; }
             
             body { 
-              margin: 0; 
-              padding: 0; 
+              margin: 0; padding: 0; 
               font-family: 'Inter', -apple-system, sans-serif; 
-              color: #111827; 
-              background: #fff;
-              font-size: 10pt;
-              line-height: 1.5;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
+              color: #111827; background: #fff;
+              font-size: 9.5pt; line-height: 1.5;
+              -webkit-print-color-adjust: exact; print-color-adjust: exact;
             }
 
             .header {
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-              border-bottom: 2px solid #E5E7EB;
-              padding-bottom: 8mm;
-              margin-bottom: 8mm;
+              display: flex; justify-content: space-between; align-items: flex-start;
+              border-bottom: 2px solid #E5E7EB; padding-bottom: 6mm; margin-bottom: 6mm;
             }
 
-            .company-logo {
-              max-height: 20mm;
-              max-width: 60mm;
-              object-fit: contain;
-            }
+            .company-logo { max-height: 18mm; max-width: 55mm; object-fit: contain; }
 
             .quote-title {
-              font-size: 28pt;
-              font-weight: 800;
-              letter-spacing: -1px;
-              color: #111827;
-              margin: 0;
-              text-align: right;
+              font-size: 26pt; font-weight: 800; letter-spacing: -1px;
+              color: #111827; margin: 0; text-align: right;
             }
 
-            .quote-meta {
-              font-size: 9pt;
-              color: #6B7280;
-              text-align: right;
-              margin-top: 2mm;
-            }
+            .quote-meta { font-size: 8.5pt; color: #4B5563; text-align: right; margin-top: 2mm; }
 
-            .details-grid {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 10mm;
-            }
+            .details-grid { display: flex; justify-content: space-between; margin-bottom: 8mm; }
 
+            .details-block { width: 48%; }
             .details-block h4 {
-              font-size: 8pt;
-              font-weight: 700;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-              color: #6B7280;
-              margin: 0 0 2mm 0;
+              font-size: 8pt; font-weight: 700; text-transform: uppercase;
+              letter-spacing: 0.5px; color: #6B7280; margin: 0 0 2mm 0;
             }
-
-            .details-block p {
-              margin: 0;
-              font-weight: 500;
-              color: #111827;
-            }
+            .details-block p { margin: 0; font-size: 9pt; color: #374151; }
+            .details-block strong { color: #111827; font-[600]; }
 
             .summary-box {
-              background: #F9FAFB;
-              border: 1px solid #E5E7EB;
-              border-radius: 6px;
-              padding: 5mm;
-              margin-bottom: 8mm;
+              background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 6px;
+              padding: 4mm 5mm; margin-bottom: 6mm;
             }
+            .summary-box h3 { margin: 0 0 1.5mm 0; font-size: 10pt; font-weight: 700; }
+            .summary-box p { margin: 0; color: #4B5563; font-size: 9pt; }
 
-            .summary-box h3 {
-              margin: 0 0 2mm 0;
-              font-size: 11pt;
-              font-weight: 700;
-            }
-
-            .summary-box p {
-              margin: 0;
-              color: #4B5563;
-              font-size: 9.5pt;
-            }
-
-            .items-table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-bottom: 8mm;
-            }
-
+            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 6mm; }
             .items-table th {
-              background: #F3F4F6;
-              color: #374151;
-              font-size: 8.5pt;
-              font-weight: 700;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-              padding: 3mm 4mm;
-              text-align: left;
-              border-bottom: 1px solid #D1D5DB;
+              background: #F3F4F6; color: #374151; font-size: 8pt; font-weight: 700;
+              text-transform: uppercase; letter-spacing: 0.5px; padding: 2.5mm 3.5mm;
+              text-align: left; border-bottom: 1px solid #D1D5DB;
             }
-
-            .items-table td {
-              padding: 4mm;
-              border-bottom: 1px solid #E5E7EB;
-              font-size: 9.5pt;
-              color: #111827;
-            }
+            .items-table td { padding: 3mm 3.5mm; border-bottom: 1px solid #E5E7EB; font-size: 9pt; color: #111827; }
 
             .text-right { text-align: right; }
             .text-center { text-align: center; }
 
-            .totals-container {
-              display: flex;
-              justify-content: flex-end;
-              margin-bottom: 10mm;
-            }
-
-            .totals-table {
-              width: 45%;
-              border-collapse: collapse;
-            }
-
-            .totals-table td {
-              padding: 2mm 0;
-              font-size: 9.5pt;
-              color: #4B5563;
-            }
-
+            .totals-container { display: flex; justify-content: flex-end; margin-bottom: 8mm; }
+            .totals-table { width: 45%; border-collapse: collapse; }
+            .totals-table td { padding: 1.5mm 0; font-size: 9pt; color: #4B5563; }
             .totals-table .grand-total {
-              border-top: 2px solid #111827;
-              font-size: 12pt;
-              font-weight: 800;
-              color: #111827;
-              padding-top: 3mm;
+              border-top: 2px solid #111827; font-size: 11pt; font-weight: 800;
+              color: #111827; padding-top: 2.5mm;
             }
 
-            .terms {
-              border-top: 1px solid #E5E7EB;
-              padding-top: 6mm;
-              font-size: 8.5pt;
-              color: #6B7280;
+            .terms-grid {
+              display: flex; justify-content: space-between; gap: 6mm;
+              border-top: 1px solid #E5E7EB; padding-top: 5mm; margin-bottom: 6mm;
             }
+            .terms-box { width: 50%; font-size: 8pt; color: #6B7280; }
+            .terms-box h5 { margin: 0 0 1mm 0; font-size: 8pt; font-weight: 700; color: #374151; }
 
-            .terms h5 {
-              margin: 0 0 1mm 0;
-              font-size: 8.5pt;
-              font-weight: 700;
-              color: #374151;
+            /* SIGN-OFF BLOCK */
+            .signoff-container {
+              border: 1px solid #E5E7EB; border-radius: 6px; padding: 4mm 5mm;
+              background: #FAFAFA; display: flex; justify-between; align-items: flex-end;
             }
+            .signoff-box { width: 45%; }
+            .signoff-title { font-size: 8pt; font-weight: 700; uppercase; color: #374151; margin-bottom: 8mm; }
+            .signoff-line { border-bottom: 1px solid #9CA3AF; margin-bottom: 1.5mm; }
+            .signoff-sub { font-size: 7.5pt; color: #6B7280; display: flex; justify-content: space-between; }
 
             .watermark {
-              position: fixed;
-              top: 50%;
-              left: 50%;
+              position: fixed; top: 50%; left: 50%;
               transform: translate(-50%, -50%) rotate(-45deg);
-              font-size: 7rem;
-              font-weight: 900;
-              color: rgba(0, 0, 0, 0.04);
-              z-index: 9999;
-              pointer-events: none;
+              font-size: 7rem; font-weight: 900; color: rgba(0, 0, 0, 0.04);
+              z-index: 9999; pointer-events: none;
             }
           </style>
         </head>
         <body>
           ${watermarkHtml}
           
+          <!-- HEADER -->
           <div class="header">
             <div>
-              ${logoHtml ? logoHtml : `<h2 style="margin:0; font-weight:800; font-size:18pt;">${providerName.toUpperCase()}</h2>`}
+              ${logoHtml ? logoHtml : `<h2 style="margin:0; font-weight:800; font-size:16pt;">${providerName.toUpperCase()}</h2>`}
+              <div style="font-size: 8pt; color: #6B7280; margin-top: 2mm;">
+                ${providerAddress}<br/>
+                ${providerPhone} | ${providerEmail}<br/>
+                <strong>${providerVat}</strong>
+              </div>
             </div>
             <div>
               <h1 class="quote-title">QUOTE</h1>
               <div class="quote-meta">
                 <strong>Quote #:</strong> ${quoteNumber}<br/>
-                <strong>Date:</strong> ${today}<br/>
-                <strong>Valid Until:</strong> ${validUntil}
+                <strong>Issue Date:</strong> ${today}<br/>
+                <strong>Expiry Date:</strong> ${validUntil}
               </div>
             </div>
           </div>
 
+          <!-- CLIENT & PROVIDER DETAILS -->
           <div class="details-grid">
             <div class="details-block">
-              <h4>Prepared For:</h4>
-              <p>${clientName}</p>
-              <p style="color:#6B7280; font-size:9pt;">${clientMeta}</p>
+              <h4>PREPARED FOR (CLIENT):</h4>
+              <p><strong>${clientName}</strong> ${clientCompany ? `(${clientCompany})` : ''}</p>
+              <p>${clientAddress}</p>
+              <p>${clientEmail}</p>
             </div>
             <div class="details-block" style="text-align: right;">
-              <h4>Prepared By:</h4>
-              <p>${providerName}</p>
-              <p style="color:#6B7280; font-size:9pt;">${providerEmail}</p>
+              <h4>PROJECT TIMELINE:</h4>
+              <p>${projectTimeline}</p>
             </div>
           </div>
 
+          <!-- SUMMARY & SCOPE -->
           <div class="summary-box">
             <h3>Project Scope & Objectives</h3>
             <p>${scopeText}</p>
           </div>
 
+          <!-- ITEMIZED TABLE -->
           <table class="items-table">
             <thead>
               <tr>
@@ -290,6 +220,7 @@ export async function POST(req: Request) {
             </tbody>
           </table>
 
+          <!-- TOTALS -->
           <div class="totals-container">
             <table class="totals-table">
               <tr>
@@ -307,9 +238,36 @@ export async function POST(req: Request) {
             </table>
           </div>
 
-          <div class="terms">
-            <h5>Terms & Conditions</h5>
-            <p style="margin:0;">Payment is due within 14 days from quote acceptance. Work will commence upon confirmation and deposit receipt.</p>
+          <!-- TERMS & CONDITIONS -->
+          <div class="terms-grid">
+            <div class="terms-box">
+              <h5>Payment Terms</h5>
+              <p style="margin:0;">Payment is due within 14 days from acceptance date. A 30% deposit is required before work commences.</p>
+            </div>
+            <div class="terms-box">
+              <h5>Terms & Conditions</h5>
+              <p style="margin:0;">This quote is subject to our standard terms of service. Prices remain valid until the stated expiry date.</p>
+            </div>
+          </div>
+
+          <!-- SIGN-OFF & ACCEPTANCE -->
+          <div class="signoff-container">
+            <div class="signoff-box">
+              <div class="signoff-title">CLIENT APPROVAL & SIGNATURE</div>
+              <div class="signoff-line"></div>
+              <div class="signoff-sub">
+                <span>Authorized Signature</span>
+                <span>Date</span>
+              </div>
+            </div>
+            <div class="signoff-box">
+              <div class="signoff-title">PROVIDER CONFIRMATION</div>
+              <div class="signoff-line"></div>
+              <div class="signoff-sub">
+                <span>${providerName}</span>
+                <span>Date</span>
+              </div>
+            </div>
           </div>
 
         </body>
