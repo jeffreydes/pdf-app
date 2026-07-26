@@ -19,6 +19,10 @@ export default function Home() {
   const [hasPaid, setHasPaid] = useState(false);
   const [logo, setLogo] = useState<string | null>(null);
 
+  // Lead Capture Email for Free Download
+  const [userEmail, setUserEmail] = useState('');
+  const [showEmailError, setShowEmailError] = useState(false);
+
   // FAQ Accordion State
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -145,17 +149,18 @@ export default function Home() {
   };
 
   // SMART AI ESTIMATOR ENGINE
-  const handleGenerate = () => {
-    if (!prompt.trim()) return;
+  const handleGenerate = (customPrompt?: string) => {
+    const activePrompt = customPrompt || prompt;
+    if (!activePrompt.trim()) return;
     setIsLoading(true);
 
-    const rateMatch = prompt.match(/(?:rate|hourly|fee|€|eur)\s*:?\s*(\d+)/i) || 
-                      prompt.match(/(\d+)\s*(?:\/|per)?\s*(?:u|h|uur|hour)/i);
+    const rateMatch = activePrompt.match(/(?:rate|hourly|fee|€|eur)\s*:?\s*(\d+)/i) || 
+                      activePrompt.match(/(\d+)\s*(?:\/|per)?\s*(?:u|h|uur|hour)/i);
     const baseRate = rateMatch ? parseInt(rateMatch[1], 10) : 85;
 
     setTimeout(() => {
       let generatedItems: LineItem[] = [];
-      const lowerPrompt = prompt.toLowerCase();
+      const lowerPrompt = activePrompt.toLowerCase();
 
       if (lowerPrompt.includes('logo') || lowerPrompt.includes('brand') || lowerPrompt.includes('architect')) {
         generatedItems = [
@@ -177,7 +182,7 @@ export default function Home() {
         ];
       }
 
-      setScopeText(`Complete execution for: ${prompt}. Includes discovery, development, and finalized deliverables.`);
+      setScopeText(`Complete execution for: ${activePrompt}. Includes discovery, development, and finalized deliverables.`);
       setItems(generatedItems);
       setIsLoading(false);
       setCurrentStep(2);
@@ -204,13 +209,23 @@ export default function Home() {
     reader.readAsDataURL(e.target.files[0]);
   };
 
+  const handleFreeDownloadClick = () => {
+    if (!userEmail.trim() || !userEmail.includes('@')) {
+      setShowEmailError(true);
+      return;
+    }
+    setShowEmailError(false);
+    downloadPdf(true);
+  };
+
   const downloadPdf = async (isWatermarked: boolean) => {
     if (isWatermarked) setIsDownloadingFree(true);
     try {
       const payload = {
         prompt, logo, clientName, clientCompany, clientAddress, clientEmail,
         providerName, providerAddress, providerPhone, providerEmail, providerVat,
-        projectTimeline, scopeText: scopeText || prompt, items, vatRate, isWatermarked
+        projectTimeline, scopeText: scopeText || prompt, items, vatRate, isWatermarked,
+        leadEmail: userEmail
       };
 
       const response = await fetch('/api/generate-pdf', {
@@ -287,19 +302,19 @@ export default function Home() {
       {/* CENTERED MAIN CONTENT CONTAINER */}
       <main className="flex-1 max-w-3xl w-full mx-auto px-6 py-8 flex flex-col justify-center min-h-[calc(100vh-80px)]">
         
-        {/* STEP 1: TITLE, SUBTITLE & SEARCH GROUPED IN CENTER */}
+        {/* STEP 1: TITLE, SUBTITLE & SEARCH GROUPED IN CENTER WITH ANIMATIONS */}
         {currentStep === 1 && (
-          <div className="my-auto space-y-8">
-            <div className="text-center space-y-2">
-              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
+          <div className="my-auto space-y-8 animate-fade-in">
+            <div className="text-center space-y-2 transition-all duration-700 ease-out">
+              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 animate-slide-up">
                 Your idea to a functional quote in seconds.
               </h1>
-              <p className="text-sm text-gray-500 max-w-md mx-auto">
+              <p className="text-sm text-gray-500 max-w-md mx-auto animate-fade-in delay-150">
                 Describe your project or hourly rate to generate your quote.
               </p>
             </div>
 
-            <div className="relative">
+            <div className="relative animate-slide-up delay-200">
               <div className="bg-white border border-gray-200 rounded-2xl p-2 shadow-lg hover:border-gray-300 transition-all flex items-center gap-3 focus-within:ring-2 focus-within:ring-black">
                 <svg className="w-5 h-5 text-gray-400 ml-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -314,36 +329,86 @@ export default function Home() {
                 />
 
                 <button 
-                  onClick={handleGenerate}
+                  onClick={() => handleGenerate()}
                   disabled={isLoading || !prompt.trim()}
                   className="px-6 py-3 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 disabled:opacity-40 transition-all active:scale-95 flex-shrink-0"
                 >
                   {isLoading ? 'Estimating...' : 'Start Quote →'}
                 </button>
               </div>
+
+              {/* PROGRAMMATIC SEO PRESET CHIPS */}
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-3 animate-fade-in delay-300">
+                <span className="text-[11px] text-gray-400 font-medium">Quick Presets:</span>
+                {[
+                  { label: "Web Design Project", query: "Web design & development, rate 85" },
+                  { label: "Logo & Branding", query: "Logo design & brand guidelines, rate 75" },
+                  { label: "Copywriting", query: "SEO copywriting & messaging, rate 65" },
+                  { label: "Consulting", query: "Strategic business consulting, rate 120" }
+                ].map((chip, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setPrompt(chip.query);
+                      handleGenerate(chip.query);
+                    }}
+                    className="text-[11px] bg-white border border-gray-200 hover:border-gray-400 text-gray-600 rounded-lg px-2.5 py-1 transition-all active:scale-95"
+                  >
+                    + {chip.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* ORGANIC TRACTION / SEO HIGHLIGHTS */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8 border-t border-gray-200/60 text-center">
-              <div>
-                <span className="block text-xs font-bold text-gray-900">Instant AI Hours Estimation</span>
-                <span className="text-[11px] text-gray-400">Smart project breakdown</span>
+            {/* ORGANIC TRACTION / SEO HIGHLIGHTS WITH ANIMATED ICONS */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-gray-200/60 text-center animate-fade-in delay-500">
+              
+              {/* Feature 1: AI Estimation */}
+              <div className="group flex flex-col items-center space-y-2 cursor-pointer">
+                <div className="w-10 h-10 rounded-xl bg-black/5 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-md">
+                  <svg className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="block text-xs font-bold text-gray-900 group-hover:text-black transition-colors">Instant AI Hours Estimation</span>
+                  <span className="text-[11px] text-gray-400">Smart project breakdown</span>
+                </div>
               </div>
-              <div>
-                <span className="block text-xs font-bold text-gray-900">Belgian & EU Company Search</span>
-                <span className="text-[11px] text-gray-400">Auto-fill official KBO / VAT data</span>
+
+              {/* Feature 2: Company Search */}
+              <div className="group flex flex-col items-center space-y-2 cursor-pointer">
+                <div className="w-10 h-10 rounded-xl bg-black/5 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-md">
+                  <svg className="w-5 h-5 transition-transform duration-300 group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="block text-xs font-bold text-gray-900 group-hover:text-black transition-colors">Belgian & EU Company Search</span>
+                  <span className="text-[11px] text-gray-400">Auto-fill official KBO / VAT data</span>
+                </div>
               </div>
-              <div>
-                <span className="block text-xs font-bold text-gray-900">Official A4 PDF Export</span>
-                <span className="text-[11px] text-gray-400">Compliant with signatures & terms</span>
+
+              {/* Feature 3: PDF Export */}
+              <div className="group flex flex-col items-center space-y-2 cursor-pointer">
+                <div className="w-10 h-10 rounded-xl bg-black/5 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-md">
+                  <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <span className="block text-xs font-bold text-gray-900 group-hover:text-black transition-colors">Official A4 PDF Export</span>
+                  <span className="text-[11px] text-gray-400">Compliant with signatures & terms</span>
+                </div>
               </div>
+
             </div>
           </div>
         )}
 
         {/* STEPS 2, 3, & 4 HERO TITLE HEADER */}
         {currentStep > 1 && (
-          <div className="text-center mb-8 space-y-2">
+          <div className="text-center mb-8 space-y-2 animate-fade-in">
             <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
               Your idea to a functional quote in seconds.
             </h1>
@@ -357,7 +422,7 @@ export default function Home() {
 
         {/* STEP 2: PROVIDER & BRAND DETAILS */}
         {currentStep === 2 && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px]">
                 <div>
@@ -436,7 +501,7 @@ export default function Home() {
 
         {/* STEP 3: CLIENT & TIMELINE DETAILS */}
         {currentStep === 3 && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in">
             <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Client & Timeline Details</span>
@@ -493,9 +558,9 @@ export default function Home() {
           </div>
         )}
 
-        {/* STEP 4: SCOPE, PRICING & IN-BOX ACTION BUTTONS */}
+        {/* STEP 4: SCOPE, PRICING & IN-BOX MONETIZATION BUTTONS */}
         {currentStep === 4 && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in">
             <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm">
               <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Project Scope & Objectives</label>
               <textarea value={scopeText} onChange={(e) => setScopeText(e.target.value)} rows={2} placeholder="Detailed description of the project scope..." className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium outline-none focus:border-black resize-none" />
@@ -542,44 +607,69 @@ export default function Home() {
               </div>
             </div>
 
-            {/* BUTTONS DIRECTLY INSIDE STEP 4 CONTAINER */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-              <button onClick={() => setCurrentStep(3)} className="w-full sm:w-auto px-5 py-3 rounded-xl border border-gray-200 text-xs font-bold hover:bg-gray-100 transition-all">
-                ← Back
-              </button>
+            {/* LEAD CAPTURE & MONETIZATION CHECKOUT BLOCK */}
+            <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold text-gray-900">Export Options</span>
+                <span className="text-[10px] text-gray-400 font-medium">Instant High-Resolution A4 PDF</span>
+              </div>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <button 
-                  onClick={() => downloadPdf(true)}
-                  disabled={isDownloadingFree}
-                  className="flex-1 sm:flex-none py-3 px-5 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95 text-center flex items-center justify-center gap-2 disabled:opacity-50 border border-gray-200"
-                >
-                  {isDownloadingFree ? (
-                    <>
-                      <svg className="animate-spin h-3.5 w-3.5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Downloading...</span>
-                    </>
-                  ) : (
-                    'Download free quote'
-                  )}
+              {/* LEAD CAPTURE EMAIL FIELD */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Your Email (To receive draft updates)</label>
+                <input 
+                  type="email" 
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                  placeholder="you@company.com" 
+                  className={`w-full bg-gray-50 border ${showEmailError ? 'border-red-500' : 'border-gray-200'} rounded-xl p-2.5 text-xs outline-none focus:border-black font-medium`}
+                />
+                {showEmailError && <p className="text-[10px] text-red-500 mt-1">Please enter a valid email address to download your free quote.</p>}
+              </div>
+
+              {/* ACTION BUTTONS */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                <button onClick={() => setCurrentStep(3)} className="w-full sm:w-auto px-5 py-3 rounded-xl border border-gray-200 text-xs font-bold hover:bg-gray-100 transition-all">
+                  ← Back
                 </button>
 
-                <a 
-                  href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
-                  className="lemonsqueezy-button flex-1 sm:flex-none py-3 px-5 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
-                >
-                  Download Full PDF
-                </a>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <button 
+                    onClick={handleFreeDownloadClick}
+                    disabled={isDownloadingFree}
+                    className="flex-1 sm:flex-none py-3 px-5 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95 text-center flex items-center justify-center gap-2 disabled:opacity-50 border border-gray-200"
+                  >
+                    {isDownloadingFree ? (
+                      <>
+                        <svg className="animate-spin h-3.5 w-3.5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Downloading...</span>
+                      </>
+                    ) : (
+                      'Download free quote'
+                    )}
+                  </button>
+
+                  <a 
+                    href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
+                    className="lemonsqueezy-button flex-1 sm:flex-none py-3 px-5 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
+                  >
+                    Download Full PDF (€4.99)
+                  </a>
+                </div>
               </div>
+
+              <p className="text-[10px] text-gray-400 text-center pt-2">
+                Free download includes a subtle watermark and signature preview block. Upgrade removes all watermarks for official client delivery.
+              </p>
             </div>
           </div>
         )}
 
         {/* SEO FAQ ACCORDION SECTION */}
-        <section className="mt-20 pt-10 border-t border-gray-200/80 mb-20">
+        <section className="mt-20 pt-10 border-t border-gray-200/80 mb-20 animate-fade-in">
           <div className="text-center mb-8 space-y-1">
             <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Frequently Asked Questions</h2>
             <p className="text-xs text-gray-500">Everything you need to know about building official quotes.</p>
@@ -596,7 +686,7 @@ export default function Home() {
                   <span className="text-gray-400 font-mono text-sm ml-2">{openFaq === idx ? '−' : '+'}</span>
                 </button>
                 {openFaq === idx && (
-                  <div className="px-4 pb-4 text-xs text-gray-500 leading-relaxed border-t border-gray-100 pt-3 bg-gray-50/50">
+                  <div className="px-4 pb-4 text-xs text-gray-500 leading-relaxed border-t border-gray-100 pt-3 bg-gray-50/50 animate-fade-in">
                     {faq.a}
                   </div>
                 )}
