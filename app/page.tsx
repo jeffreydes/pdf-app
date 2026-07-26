@@ -322,6 +322,22 @@ export default function Home() {
                 </button>
               </div>
             </div>
+
+            {/* ORGANIC TRACTION / SEO HIGHLIGHTS */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8 border-t border-gray-200/60 text-center">
+              <div>
+                <span className="block text-xs font-bold text-gray-900">Instant AI Hours Estimation</span>
+                <span className="text-[11px] text-gray-400">Smart project breakdown</span>
+              </div>
+              <div>
+                <span className="block text-xs font-bold text-gray-900">Belgian & EU Company Search</span>
+                <span className="text-[11px] text-gray-400">Auto-fill official KBO / VAT data</span>
+              </div>
+              <div>
+                <span className="block text-xs font-bold text-gray-900">Official A4 PDF Export</span>
+                <span className="text-[11px] text-gray-400">Compliant with signatures & terms</span>
+              </div>
+            </div>
           </div>
         )}
 
@@ -477,7 +493,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* STEP 4: SCOPE, PRICING & DOWNLOAD */}
+        {/* STEP 4: SCOPE, PRICING & IN-BOX ACTION BUTTONS */}
         {currentStep === 4 && (
           <div className="space-y-6">
             <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm">
@@ -526,8 +542,38 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="flex justify-between pt-4 pb-12">
-              <button onClick={() => setCurrentStep(3)} className="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-bold hover:bg-gray-100">← Back</button>
+            {/* BUTTONS DIRECTLY INSIDE STEP 4 CONTAINER */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+              <button onClick={() => setCurrentStep(3)} className="w-full sm:w-auto px-5 py-3 rounded-xl border border-gray-200 text-xs font-bold hover:bg-gray-100 transition-all">
+                ← Back
+              </button>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button 
+                  onClick={() => downloadPdf(true)}
+                  disabled={isDownloadingFree}
+                  className="flex-1 sm:flex-none py-3 px-5 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95 text-center flex items-center justify-center gap-2 disabled:opacity-50 border border-gray-200"
+                >
+                  {isDownloadingFree ? (
+                    <>
+                      <svg className="animate-spin h-3.5 w-3.5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Downloading...</span>
+                    </>
+                  ) : (
+                    'Download free quote'
+                  )}
+                </button>
+
+                <a 
+                  href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
+                  className="lemonsqueezy-button flex-1 sm:flex-none py-3 px-5 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
+                >
+                  Download Full PDF
+                </a>
+              </div>
             </div>
           </div>
         )}
@@ -560,39 +606,6 @@ export default function Home() {
         </section>
 
       </main>
-
-      {/* ACTION BAR WITH FREE DOWNLOAD + LOADING SPINNER (ONLY ON STEP 4) */}
-      {currentStep === 4 && (
-        <div className="fixed bottom-6 inset-x-0 z-50 flex justify-center px-6">
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/80 p-3 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md w-full justify-between">
-            
-            <button 
-              onClick={() => downloadPdf(true)}
-              disabled={isDownloadingFree}
-              className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95 text-center flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              {isDownloadingFree ? (
-                <>
-                  <svg className="animate-spin h-3.5 w-3.5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>Downloading...</span>
-                </>
-              ) : (
-                'Download free quote'
-              )}
-            </button>
-
-            <a 
-              href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
-              className="lemonsqueezy-button flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
-            >
-              Download Full PDF
-            </a>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
