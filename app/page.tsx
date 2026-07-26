@@ -6,8 +6,8 @@ import Script from 'next/script';
 interface LineItem {
   id: string;
   description: string;
-  qty: number;
-  price: number;
+  qty: number; // Hours
+  price: number; // Hourly Rate
 }
 
 export default function Home() {
@@ -25,10 +25,11 @@ export default function Home() {
   const [scopeText, setScopeText] = useState('');
   const [vatRate, setVatRate] = useState<number>(21);
 
-  // Dynamic Line Items
+  // Dynamic Line Items (Hours & Rates)
   const [items, setItems] = useState<LineItem[]>([
-    { id: '1', description: 'Scope Execution & Deliverables', qty: 1, price: 2450 },
-    { id: '2', description: 'Quality Assurance & Testing', qty: 1, price: 500 }
+    { id: '1', description: 'Concept & Discovery', qty: 8, price: 85 },
+    { id: '2', description: 'Design & Execution', qty: 24, price: 85 },
+    { id: '3', description: 'QA, Testing & Delivery', qty: 6, price: 85 }
   ]);
 
   // Calculations
@@ -60,26 +61,53 @@ export default function Home() {
     }
   }, [hasPaid]);
 
+  // SMART AI ESTIMATOR ENGINE
   const handleGenerate = () => {
-    if (!prompt.trim() && !scopeText.trim()) return;
+    if (!prompt.trim()) return;
     setIsLoading(true);
 
-    if (!scopeText) {
-      setScopeText(prompt);
-    }
+    // Slimme herleiding uit de prompt (Zoekt bijv. naar uurtarieven zoals '€85/h' of '85/u')
+    const rateMatch = prompt.match(/(?:€|eur)?\s*(\d+)\s*(?:\/|per)?\s*(?:u|h|uur|hour)/i);
+    const baseRate = rateMatch ? parseInt(rateMatch[1]) : 85;
 
+    // AI simuleert het opbreken van het project in uren op basis van trefwoorden
     setTimeout(() => {
+      let generatedItems: LineItem[] = [];
+      const lowerPrompt = prompt.toLowerCase();
+
+      if (lowerPrompt.includes('logo') || lowerPrompt.includes('brand') || lowerPrompt.includes('architect')) {
+        generatedItems = [
+          { id: '1', description: 'Research & Moodboarding', qty: 6, price: baseRate },
+          { id: '2', description: 'Logo Concept & Vector Design', qty: 16, price: baseRate },
+          { id: '3', description: 'Brand Guidelines & Exporting Assets', qty: 8, price: baseRate }
+        ];
+      } else if (lowerPrompt.includes('web') || lowerPrompt.includes('site') || lowerPrompt.includes('app')) {
+        generatedItems = [
+          { id: '1', description: 'UX/UI Wireframing & Design', qty: 16, price: baseRate },
+          { id: '2', description: 'Frontend & Backend Development', qty: 32, price: baseRate },
+          { id: '3', description: 'Testing, Deployment & SEO Setup', qty: 8, price: baseRate }
+        ];
+      } else {
+        generatedItems = [
+          { id: '1', description: 'Strategy & Project Preparation', qty: 8, price: baseRate },
+          { id: '2', description: 'Primary Deliverables Execution', qty: 20, price: baseRate },
+          { id: '3', description: 'Final Quality Assurance & Handover', qty: 6, price: baseRate }
+        ];
+      }
+
+      setScopeText(`Complete execution for: ${prompt}. Includes discovery, development, and finalized deliverables.`);
+      setItems(generatedItems);
       setIsLoading(false);
       setIsGenerated(true);
-    }, 1000);
+    }, 1100);
   };
 
   const addItem = () => {
     const newItem: LineItem = {
       id: Date.now().toString(),
-      description: 'New Service Item',
-      qty: 1,
-      price: 250
+      description: 'Additional Service / Phase',
+      qty: 4,
+      price: 85
     };
     setItems([...items, newItem]);
   };
@@ -168,11 +196,11 @@ export default function Home() {
             Your idea to a functional quote in seconds.
           </h1>
           <p className="text-sm text-gray-500 max-w-md mx-auto">
-            Describe your project or customize the fields below to construct your official quote.
+            Describe your project, hourly rate or estimated fee, we'll do the rest.
           </p>
         </div>
 
-        {/* PROMPT SEARCH BAR */}
+        {/* SMART AI PROMPT BAR */}
         <div className="relative mb-8">
           <div className="bg-white border border-gray-200 rounded-2xl p-2 shadow-lg hover:border-gray-300 transition-all flex items-center gap-3 focus-within:ring-2 focus-within:ring-black">
             <svg className="w-5 h-5 text-gray-400 ml-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,29 +209,26 @@ export default function Home() {
             
             <input 
               value={prompt}
-              onChange={(e) => {
-                setPrompt(e.target.value);
-                setScopeText(e.target.value);
-              }}
+              onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
-              placeholder="e.g. Logo design for an architect..." 
+              placeholder="e.g. Logo design for an architect at €85/hour..." 
               className="w-full bg-transparent text-sm sm:text-base outline-none text-gray-900 placeholder:text-gray-400 font-medium"
             />
 
             <button 
               onClick={handleGenerate}
-              disabled={isLoading || (!prompt.trim() && !scopeText.trim())}
+              disabled={isLoading || !prompt.trim()}
               className="px-6 py-3 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 disabled:opacity-40 transition-all active:scale-95 flex-shrink-0"
             >
-              {isLoading ? 'Processing...' : 'Generate'}
+              {isLoading ? 'Estimating...' : 'Generate'}
             </button>
           </div>
         </div>
 
-        {/* BENTO GRID: CARD 1 (BRAND & LOGO) & CARD 2 (CLIENT & PROVIDER) */}
+        {/* BENTO GRID: BRAND & PARTIES */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           
-          {/* CARD 1: LOGO */}
+          {/* BRAND LOGO */}
           <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px]">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-1">Brand Logo</span>
@@ -229,7 +254,7 @@ export default function Home() {
             )}
           </div>
 
-          {/* CARD 2: CLIENT & PROVIDER */}
+          {/* PARTIES INFO */}
           <div className="md:col-span-2 bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm space-y-4">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Parties Information</span>
             
@@ -270,7 +295,7 @@ export default function Home() {
 
         </div>
 
-        {/* CARD 3: SCOPE TEXT */}
+        {/* SCOPE OBJECTIVES */}
         <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm mb-6">
           <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Project Scope & Objectives</label>
           <textarea 
@@ -282,10 +307,10 @@ export default function Home() {
           />
         </div>
 
-        {/* CARD 4: DYNAMIC LINE ITEMS & TOTALS */}
+        {/* DYNAMIC LINE ITEMS (HOURS & RATES) */}
         <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm mb-8 space-y-4">
           <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Deliverables & Pricing</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Project Hours & Hourly Rates</span>
             <button 
               onClick={addItem}
               className="text-xs font-bold text-black hover:underline flex items-center gap-1"
@@ -294,30 +319,35 @@ export default function Home() {
             </button>
           </div>
 
-          {/* DYNAMIC ITEMS LIST */}
           <div className="space-y-3">
             {items.map((item) => (
               <div key={item.id} className="flex gap-2 items-center bg-gray-50/80 p-2 rounded-xl border border-gray-200/60">
                 <input 
                   value={item.description}
                   onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                  placeholder="Item Description"
+                  placeholder="Phase / Deliverable"
                   className="flex-1 bg-white border border-gray-200 rounded-lg p-2 text-xs font-medium outline-none focus:border-black"
                 />
-                <input 
-                  type="number"
-                  value={item.qty}
-                  onChange={(e) => updateItem(item.id, 'qty', parseInt(e.target.value) || 1)}
-                  placeholder="Qty"
-                  className="w-14 bg-white border border-gray-200 rounded-lg p-2 text-xs font-bold text-center outline-none focus:border-black"
-                />
-                <input 
-                  type="number"
-                  value={item.price}
-                  onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
-                  placeholder="Price"
-                  className="w-24 bg-white border border-gray-200 rounded-lg p-2 text-xs font-bold outline-none focus:border-black"
-                />
+                <div className="relative">
+                  <input 
+                    type="number"
+                    value={item.qty}
+                    onChange={(e) => updateItem(item.id, 'qty', parseInt(e.target.value) || 0)}
+                    placeholder="Hours"
+                    className="w-16 bg-white border border-gray-200 rounded-lg p-2 pr-6 text-xs font-bold text-center outline-none focus:border-black"
+                  />
+                  <span className="absolute right-1.5 top-2 text-[9px] text-gray-400 font-semibold">hrs</span>
+                </div>
+                <div className="relative">
+                  <input 
+                    type="number"
+                    value={item.price}
+                    onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)}
+                    placeholder="Rate"
+                    className="w-20 bg-white border border-gray-200 rounded-lg p-2 pr-6 text-xs font-bold outline-none focus:border-black"
+                  />
+                  <span className="absolute right-1.5 top-2 text-[9px] text-gray-400 font-semibold">€/h</span>
+                </div>
                 {items.length > 1 && (
                   <button 
                     onClick={() => removeItem(item.id)}
@@ -330,7 +360,6 @@ export default function Home() {
             ))}
           </div>
 
-          {/* VAT SELECTOR & TOTALS */}
           <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 font-medium">VAT Rate:</span>
@@ -356,25 +385,23 @@ export default function Home() {
       </main>
 
       {/* STICKY BOTTOM ACTION BAR */}
-      {isGenerated && (
-        <div className="fixed bottom-6 inset-x-0 z-50 flex justify-center px-6">
-          <div className="bg-white/90 backdrop-blur-xl border border-gray-200/80 p-3 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md w-full justify-between animate-fade-in">
-            <button 
-              onClick={() => downloadPdf(true)}
-              className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95 text-center"
-            >
-              Preview Draft
-            </button>
+      <div className="fixed bottom-6 inset-x-0 z-50 flex justify-center px-6">
+        <div className="bg-white/90 backdrop-blur-xl border border-gray-200/80 p-3 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md w-full justify-between">
+          <button 
+            onClick={() => downloadPdf(true)}
+            className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95 text-center"
+          >
+            Preview Draft
+          </button>
 
-            <a 
-              href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
-              className="lemonsqueezy-button flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
-            >
-              Download Full PDF
-            </a>
-          </div>
+          <a 
+            href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
+            className="lemonsqueezy-button flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
+          >
+            Download Full PDF
+          </a>
         </div>
-      )}
+      </div>
 
     </div>
   );

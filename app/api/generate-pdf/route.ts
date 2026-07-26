@@ -22,10 +22,10 @@ export async function POST(req: Request) {
     const providerEmail = data.providerEmail || 'contact@yourcompany.com';
     const scopeText = data.scopeText || data.prompt || 'Services and deliverables as specified in the proposal agreement.';
 
-    // Dynamic Line Items Calculations
+    // Dynamic Line Items Calculations (Qty = Hours, Price = Hourly Rate)
     const items: LineItem[] = data.items && data.items.length > 0 
       ? data.items 
-      : [{ description: 'Scope Execution & Deliverables', qty: 1, price: 2450 }];
+      : [{ description: 'Project Scope Execution', qty: 10, price: 85 }];
 
     const vatRate = parseFloat(data.vatRate) || 21;
 
@@ -58,8 +58,8 @@ export async function POST(req: Request) {
         <td>
           <strong>${item.description}</strong>
         </td>
-        <td class="text-center">${item.qty}</td>
-        <td class="text-right">${formatCurrency(item.price)}</td>
+        <td class="text-center">${item.qty} hrs</td>
+        <td class="text-right">${formatCurrency(item.price)} / hr</td>
         <td class="text-right">${formatCurrency(item.qty * item.price)}</td>
       </tr>
     `).join('');
@@ -280,8 +280,8 @@ export async function POST(req: Request) {
             <thead>
               <tr>
                 <th>Description</th>
-                <th class="text-center">Qty</th>
-                <th class="text-right">Unit Price</th>
+                <th class="text-center">Hours</th>
+                <th class="text-right">Rate</th>
                 <th class="text-right">Amount</th>
               </tr>
             </thead>
