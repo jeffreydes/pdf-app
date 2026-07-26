@@ -1,20 +1,30 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Quotebuilder",
-  description: "Generate your quote in seconds",
+  title: "QuoteBuilder | Your idea to a functional quote in seconds",
+  description: "Create official, legally compliant PDF quotes in seconds based on your project idea, hourly rate, or company VAT number. Free preview & instant download.",
+  keywords: [
+    "quote maker",
+    "free pdf quote generator",
+    "invoice and quote builder",
+    "ai quote generator",
+    "official proposal pdf",
+    "hourly rate quote calculator"
+  ],
+  openGraph: {
+    title: "QuoteBuilder | Create Official PDF Quotes in Seconds",
+    description: "Generate professional A4 PDF quotes automatically with AI project estimation and instant company lookup.",
+    type: "website",
+    locale: "en_US",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -22,12 +32,29 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "QuoteBuilder",
+    "operatingSystem": "All",
+    "applicationCategory": "BusinessApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR"
+    },
+    "description": "Generate professional and official PDF quotes in seconds with smart AI project estimation and automatic company lookup."
+  };
+
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

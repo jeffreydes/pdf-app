@@ -19,6 +19,9 @@ export default function Home() {
   const [hasPaid, setHasPaid] = useState(false);
   const [logo, setLogo] = useState<string | null>(null);
 
+  // FAQ Accordion State
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
   // Provider Smart Search
   const [providerQuery, setProviderQuery] = useState('');
   const [providerSuggestions, setProviderSuggestions] = useState<any[]>([]);
@@ -81,7 +84,7 @@ export default function Home() {
     }
   }, [hasPaid]);
 
-  // Provider Search (Stap 2)
+  // Provider Search (Step 2)
   const handleProviderSearch = async (val: string) => {
     setProviderQuery(val);
     if (val.length < 2) {
@@ -111,7 +114,7 @@ export default function Home() {
     setShowProviderDropdown(false);
   };
 
-  // Client Search (Stap 3)
+  // Client Search (Step 3)
   const handleClientSearch = async (val: string) => {
     setClientQuery(val);
     if (val.length < 2) {
@@ -229,6 +232,26 @@ export default function Home() {
       if (isWatermarked) setIsDownloadingFree(false);
     }
   };
+
+  // SEO FAQ Data
+  const faqs = [
+    {
+      q: "How does the AI Quote Generator estimate hours and rates?",
+      a: "Our AI engine analyzes your project description, identifies key deliverables, and estimates realistic hours based on industry standards. If you specify an hourly rate (e.g., 'rate 50'), it automatically calculates the total line items accordingly."
+    },
+    {
+      q: "Can I automatically import company data (KBO / VAT)?",
+      a: "Yes! By typing your company name or client name in the Smart Company Search bar, our system connects directly with public enterprise registries to auto-fill official registered names, addresses, and VAT numbers."
+    },
+    {
+      q: "Is the generated PDF quote legally binding and official?",
+      a: "Absolutely. Every generated PDF includes official quote components: unique Quote tracking numbers, issue & expiry dates, itemized breakdowns with VAT rates, terms & conditions, and formal client approval signature blocks."
+    },
+    {
+      q: "What is the difference between 'Download free quote' and 'Download Full PDF'?",
+      a: "Downloading a free quote provides a draft document containing a watermark for quick previews and internal review. Downloading the full PDF provides an un-watermarked, official document ready to send directly to your client."
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#111827] font-sans antialiased flex flex-col justify-between">
@@ -408,7 +431,7 @@ export default function Home() {
                 </div>
 
                 {showClientDropdown && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-[#FFFFFF] border border-gray-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-gray-100">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-gray-100">
                     {clientSuggestions.map((item, idx) => (
                       <div 
                         key={idx} 
@@ -497,6 +520,33 @@ export default function Home() {
           </div>
         )}
 
+        {/* SEO FAQ ACCORDION SECTION */}
+        <section className="mt-20 pt-10 border-t border-gray-200/80 mb-20">
+          <div className="text-center mb-8 space-y-1">
+            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Frequently Asked Questions</h2>
+            <p className="text-xs text-gray-500">Everything you need to know about building official quotes.</p>
+          </div>
+
+          <div className="space-y-3">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="bg-white border border-gray-200/80 rounded-2xl overflow-hidden shadow-sm transition-all">
+                <button
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="w-full text-left p-4 text-xs font-bold text-gray-900 flex justify-between items-center hover:bg-gray-50"
+                >
+                  <span>{faq.q}</span>
+                  <span className="text-gray-400 font-mono text-sm ml-2">{openFaq === idx ? '−' : '+'}</span>
+                </button>
+                {openFaq === idx && (
+                  <div className="px-4 pb-4 text-xs text-gray-500 leading-relaxed border-t border-gray-100 pt-3 bg-gray-50/50">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
       </main>
 
       {/* ACTION BAR WITH FREE DOWNLOAD + LOADING SPINNER */}
@@ -504,7 +554,6 @@ export default function Home() {
         <div className="fixed bottom-6 inset-x-0 z-50 flex justify-center px-6">
           <div className="bg-white/90 backdrop-blur-xl border border-gray-200/80 p-3 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md w-full justify-between">
             
-            {/* DOWNLOAD FREE QUOTE WITH LOADING SPINNER */}
             <button 
               onClick={() => downloadPdf(true)}
               disabled={isDownloadingFree}
@@ -523,7 +572,6 @@ export default function Home() {
               )}
             </button>
 
-            {/* DOWNLOAD FULL PDF */}
             <a 
               href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
               className="lemonsqueezy-button flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
