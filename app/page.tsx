@@ -481,7 +481,7 @@ export default function Home() {
                       value={providerQuery} 
                       onChange={(e) => handleProviderSearch(e.target.value)} 
                       onFocus={() => providerSuggestions.length > 0 && setShowProviderDropdown(true)}
-                      placeholder="Search your business (e.g. Studio Des, Acme Corp)..." 
+                      placeholder="Search your business..." 
                       className="flex-1 bg-transparent text-xs font-medium outline-none text-gray-900 placeholder:text-gray-400"
                     />
                     {isSearchingProvider && <span className="text-[10px] text-gray-400 animate-pulse mr-2">Searching...</span>}
@@ -680,7 +680,7 @@ export default function Home() {
                     href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
                     className="lemonsqueezy-button flex-1 sm:flex-none py-3 px-5 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
                   >
-                    Download Full PDF (€4.99)
+                    Download Full PDF
                   </a>
                 </div>
               </div>
