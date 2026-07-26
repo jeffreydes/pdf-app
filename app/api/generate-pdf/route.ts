@@ -4,10 +4,30 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
     
-    // Default dates & numbers if not generated dynamically
+    // Dates & Quote details
     const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     const quoteNumber = `QT-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    // Input values with fallback defaults
+    const clientName = data.clientName || 'Valued Client';
+    const clientMeta = data.clientMeta || 'Requested via Quote Generator';
+    const providerName = data.providerName || 'Your Company Name';
+    const providerEmail = data.providerEmail || 'contact@yourcompany.com';
+    const scopeText = data.scopeText || data.prompt || 'Services and deliverables as specified in the proposal agreement.';
+
+    // Price items
+    const item1Price = parseFloat(data.item1Price) || 2450;
+    const item2Price = parseFloat(data.item2Price) || 500;
+    const vatRate = parseFloat(data.vatRate) || 21;
+
+    const subtotal = item1Price + item2Price;
+    const vatAmount = subtotal * (vatRate / 100);
+    const totalDue = subtotal + vatAmount;
+
+    // Formatting currency
+    const formatCurrency = (amount: number) => 
+      new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
 
     const browser = await puppeteer.connect({
       browserWSEndpoint: 'wss://chrome.browserless.io?token=2Ux3shWGILlWVL2936ab4b2f23a7a88c7d45a76f61836bbaa'
@@ -49,7 +69,6 @@ export async function POST(req: Request) {
               print-color-adjust: exact;
             }
 
-            /* HEADER SECTION */
             .header {
               display: flex;
               justify-content: space-between;
@@ -81,7 +100,6 @@ export async function POST(req: Request) {
               margin-top: 2mm;
             }
 
-            /* DETAILS SECTION */
             .details-grid {
               display: flex;
               justify-content: space-between;
@@ -103,7 +121,6 @@ export async function POST(req: Request) {
               color: #111827;
             }
 
-            /* DESCRIPTION / INTRO */
             .summary-box {
               background: #F9FAFB;
               border: 1px solid #E5E7EB;
@@ -124,7 +141,6 @@ export async function POST(req: Request) {
               font-size: 9.5pt;
             }
 
-            /* OFFICIAL TABLE */
             .items-table {
               width: 100%;
               border-collapse: collapse;
@@ -153,7 +169,6 @@ export async function POST(req: Request) {
             .text-right { text-align: right; }
             .text-center { text-align: center; }
 
-            /* TOTALS SECTION */
             .totals-container {
               display: flex;
               justify-content: flex-end;
@@ -161,7 +176,7 @@ export async function POST(req: Request) {
             }
 
             .totals-table {
-              width: 40%;
+              width: 45%;
               border-collapse: collapse;
             }
 
@@ -179,7 +194,6 @@ export async function POST(req: Request) {
               padding-top: 3mm;
             }
 
-            /* TERMS & FOOTER */
             .terms {
               border-top: 1px solid #E5E7EB;
               padding-top: 6mm;
@@ -210,10 +224,9 @@ export async function POST(req: Request) {
         <body>
           ${watermarkHtml}
           
-          <!-- HEADER -->
           <div class="header">
             <div>
-              ${logoHtml ? logoHtml : '<h2 style="margin:0; font-weight:800; font-size:18pt;">SERVICES PROVIDER</h2>'}
+              ${logoHtml ? logoHtml : `<h2 style="margin:0; font-weight:800; font-size:18pt;">${providerName.toUpperCase()}</h2>`}
             </div>
             <div>
               <h1 class="quote-title">QUOTE</h1>
@@ -225,27 +238,24 @@ export async function POST(req: Request) {
             </div>
           </div>
 
-          <!-- DETAILS -->
           <div class="details-grid">
             <div class="details-block">
               <h4>Prepared For:</h4>
-              <p>Valued Client</p>
-              <p style="color:#6B7280; font-size:9pt;">Requested via Quote Generator</p>
+              <p>${clientName}</p>
+              <p style="color:#6B7280; font-size:9pt;">${clientMeta}</p>
             </div>
             <div class="details-block" style="text-align: right;">
               <h4>Prepared By:</h4>
-              <p>Your Company Name</p>
-              <p style="color:#6B7280; font-size:9pt;">contact@yourcompany.com</p>
+              <p>${providerName}</p>
+              <p style="color:#6B7280; font-size:9pt;">${providerEmail}</p>
             </div>
           </div>
 
-          <!-- SUMMARY -->
           <div class="summary-box">
             <h3>Project Scope & Objectives</h3>
-            <p>${data.prompt ? data.prompt : 'Services and deliverables as specified in the proposal agreement.'}</p>
+            <p>${scopeText}</p>
           </div>
 
-          <!-- TABLE -->
           <table class="items-table">
             <thead>
               <tr>
@@ -262,8 +272,8 @@ export async function POST(req: Request) {
                   <span style="color:#6B7280; font-size:8.5pt;">Implementation based on provided requirements</span>
                 </td>
                 <td class="text-center">1</td>
-                <td class="text-right">€ 2,450.00</td>
-                <td class="text-right">€ 2,450.00</td>
+                <td class="text-right">${formatCurrency(item1Price)}</td>
+                <td class="text-right">${formatCurrency(item1Price)}</td>
               </tr>
               <tr>
                 <td>
@@ -271,31 +281,29 @@ export async function POST(req: Request) {
                   <span style="color:#6B7280; font-size:8.5pt;">Final review, optimizations, and delivery</span>
                 </td>
                 <td class="text-center">1</td>
-                <td class="text-right">€ 500.00</td>
-                <td class="text-right">€ 500.00</td>
+                <td class="text-right">${formatCurrency(item2Price)}</td>
+                <td class="text-right">${formatCurrency(item2Price)}</td>
               </tr>
             </tbody>
           </table>
 
-          <!-- TOTALS -->
           <div class="totals-container">
             <table class="totals-table">
               <tr>
                 <td>Subtotal</td>
-                <td class="text-right">€ 2,950.00</td>
+                <td class="text-right">${formatCurrency(subtotal)}</td>
               </tr>
               <tr>
-                <td>VAT (21%)</td>
-                <td class="text-right">€ 619.50</td>
+                <td>VAT (${vatRate}%)</td>
+                <td class="text-right">${formatCurrency(vatAmount)}</td>
               </tr>
               <tr class="grand-total">
                 <td>Total Due</td>
-                <td class="text-right">€ 3,569.50</td>
+                <td class="text-right">${formatCurrency(totalDue)}</td>
               </tr>
             </table>
           </div>
 
-          <!-- TERMS -->
           <div class="terms">
             <h5>Terms & Conditions</h5>
             <p style="margin:0;">Payment is due within 14 days from quote acceptance. Work will commence upon confirmation and deposit receipt.</p>
