@@ -287,43 +287,57 @@ export default function Home() {
       {/* CENTERED MAIN CONTENT CONTAINER */}
       <main className="flex-1 max-w-3xl w-full mx-auto px-6 py-8 flex flex-col justify-center min-h-[calc(100vh-80px)]">
         
-        {/* HERO TITLE */}
-        <div className="text-center mb-8 space-y-2">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
-            Your idea to a functional quote in seconds.
-          </h1>
-          <p className="text-sm text-gray-500 max-w-md mx-auto">
-            {currentStep === 1 && "Describe your project or hourly rate to generate your quote."}
-            {currentStep === 2 && "Search or enter your business details and brand logo."}
-            {currentStep === 3 && "Select or type your client's company information."}
-            {currentStep === 4 && "Review project line items, hours, and finalized totals."}
-          </p>
-        </div>
-
-        {/* STEP 1: PROMPT SEARCH BAR */}
+        {/* STEP 1: TITLE, SUBTITLE & SEARCH GROUPED IN CENTER */}
         {currentStep === 1 && (
-          <div className="relative my-auto">
-            <div className="bg-white border border-gray-200 rounded-2xl p-2 shadow-lg hover:border-gray-300 transition-all flex items-center gap-3 focus-within:ring-2 focus-within:ring-black">
-              <svg className="w-5 h-5 text-gray-400 ml-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              
-              <input 
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
-                placeholder="e.g. Logo design for brand, hourly rate 50..." 
-                className="w-full bg-transparent text-sm sm:text-base outline-none text-gray-900 placeholder:text-gray-400 font-medium"
-              />
-
-              <button 
-                onClick={handleGenerate}
-                disabled={isLoading || !prompt.trim()}
-                className="px-6 py-3 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 disabled:opacity-40 transition-all active:scale-95 flex-shrink-0"
-              >
-                {isLoading ? 'Estimating...' : 'Start Quote →'}
-              </button>
+          <div className="my-auto space-y-8 animate-fade-in">
+            {/* HERO TITLE */}
+            <div className="text-center space-y-2">
+              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
+                Your idea to a functional quote in seconds.
+              </h1>
+              <p className="text-sm text-gray-500 max-w-md mx-auto">
+                Describe your project or hourly rate to generate your quote.
+              </p>
             </div>
+
+            {/* PROMPT SEARCH BAR */}
+            <div className="relative">
+              <div className="bg-white border border-gray-200 rounded-2xl p-2 shadow-lg hover:border-gray-300 transition-all flex items-center gap-3 focus-within:ring-2 focus-within:ring-black">
+                <svg className="w-5 h-5 text-gray-400 ml-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                
+                <input 
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+                  placeholder="e.g. Logo design for brand, hourly rate 50..." 
+                  className="w-full bg-transparent text-sm sm:text-base outline-none text-gray-900 placeholder:text-gray-400 font-medium"
+                />
+
+                <button 
+                  onClick={handleGenerate}
+                  disabled={isLoading || !prompt.trim()}
+                  className="px-6 py-3 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 disabled:opacity-40 transition-all active:scale-95 flex-shrink-0"
+                >
+                  {isLoading ? 'Estimating...' : 'Start Quote →'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEPS 2, 3, & 4 HERO TITLE HEADER */}
+        {currentStep > 1 && (
+          <div className="text-center mb-8 space-y-2">
+            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
+              Your idea to a functional quote in seconds.
+            </h1>
+            <p className="text-sm text-gray-500 max-w-md mx-auto">
+              {currentStep === 2 && "Search or enter your business details and brand logo."}
+              {currentStep === 3 && "Select or type your client's company information."}
+              {currentStep === 4 && "Review project line items, hours, and finalized totals."}
+            </p>
           </div>
         )}
 
