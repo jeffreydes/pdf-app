@@ -2,16 +2,23 @@ import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const query = searchParams.get('q');
+  const rawQuery = searchParams.get('q');
 
-  if (!query || query.length < 2) {
+  if (!rawQuery || rawQuery.trim().length < 2) {
     return NextResponse.json([]);
   }
 
+  // Schoon de zoekopdracht op: verwijder haakjes en extra spaties
+  // "studio des ( commV )" -> "studio des commV" & "studio des"
+  const cleanQuery = rawQuery.replace(/[()]/g, '').trim();
+  const baseName = cleanQuery.replace(/\b(commv|bvba|bv|nv|vof|cv|vzw)\b/gi, '').trim();
+
+  // Probeer eerst op de opgeschoonde naam, anders op de basisnaam
+  const queryToUse = baseName.length >= 2 ? baseName : cleanQuery;
+
   try {
-    // We gebruiken de gratis OpenCorporates API voor het zoeken op bedrijfsnaam
     const response = await fetch(
-      `https://api.opencorporates.com/v0.4/companies/search?q=${encodeURIComponent(query)}&per_page=5`,
+      `https://api.opencorporates.com/v0.4/companies/search?q=${encodeURIComponent(queryToUse)}&per_page=6`,
       { headers: { 'Accept': 'application/json' } }
     );
 
