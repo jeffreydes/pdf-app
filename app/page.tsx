@@ -81,12 +81,33 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    if (hasPaid) {
-      downloadPdf(false);
-      setHasPaid(false);
+ useEffect(() => {
+  // Don't search if the user hasn't typed at least 2 characters
+  if (query.trim().length < 2) {
+    setResults([]);
+    // If you have a state for opening/closing the dropdown, close it here:
+    // setOpen(false); 
+    return;
+  }
+
+  const timer = setTimeout(async () => {
+    // setLoading(true); // uncomment if you use a loading state
+    try {
+      const res = await fetch(`/api/company-search?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      
+      // THIS is the crucial part: it forces the UI to use the results array
+      setResults(data.results || []);
+      // setOpen(true); // uncomment if you use an open state
+    } catch (err) {
+      console.error('Search failed', err);
+    } finally {
+      // setLoading(false); // uncomment if you use a loading state
     }
-  }, [hasPaid]);
+  }, 300); // 300ms debounce prevents spamming the API
+
+  return () => clearTimeout(timer);
+}, [query]);
 
   // Provider Search (Step 2)
   const handleProviderSearch = async (val: string) => {
