@@ -563,8 +563,8 @@ export default function Home() {
 
       </main>
 
-      {/* ACTION BAR WITH FREE DOWNLOAD + LOADING SPINNER */}
-      {currentStep > 1 && (
+      {/* ACTION BAR WITH FREE DOWNLOAD + LOADING SPINNER (ONLY ON STEP 4) */}
+      {currentStep === 4 && (
         <div className="fixed bottom-6 inset-x-0 z-50 flex justify-center px-6">
           <div className="bg-white/90 backdrop-blur-xl border border-gray-200/80 p-3 rounded-2xl shadow-2xl flex items-center gap-3 max-w-md w-full justify-between">
             
@@ -595,6 +595,3 @@ export default function Home() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
