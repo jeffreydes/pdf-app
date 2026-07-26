@@ -81,34 +81,6 @@ export default function Home() {
     }
   };
 
- useEffect(() => {
-  // Don't search if the user hasn't typed at least 2 characters
-  if (query.trim().length < 2) {
-    setResults([]);
-    // If you have a state for opening/closing the dropdown, close it here:
-    // setOpen(false); 
-    return;
-  }
-
-  const timer = setTimeout(async () => {
-    // setLoading(true); // uncomment if you use a loading state
-    try {
-      const res = await fetch(`/api/company-search?q=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      
-      // THIS is the crucial part: it forces the UI to use the results array
-      setResults(data.results || []);
-      // setOpen(true); // uncomment if you use an open state
-    } catch (err) {
-      console.error('Search failed', err);
-    } finally {
-      // setLoading(false); // uncomment if you use a loading state
-    }
-  }, 300); // 300ms debounce prevents spamming the API
-
-  return () => clearTimeout(timer);
-}, [query]);
-
   // Provider Search (Step 2)
   const handleProviderSearch = async (val: string) => {
     setProviderQuery(val);
@@ -122,8 +94,11 @@ export default function Home() {
     try {
       const res = await fetch(`/api/company-search?q=${encodeURIComponent(val)}`);
       const data = await res.json();
-      setProviderSuggestions(data);
-      setShowProviderDropdown(data.length > 0);
+      
+      // FIXED: Maps to the new data.results format
+      const results = data.results || [];
+      setProviderSuggestions(results);
+      setShowProviderDropdown(results.length > 0);
     } catch (err) {
       setProviderSuggestions([]);
     } finally {
@@ -135,6 +110,7 @@ export default function Home() {
     setProviderName(company.name);
     if (company.address) setProviderAddress(company.address);
     if (company.companyNumber) setProviderVat(`VAT/Reg: ${company.companyNumber}`);
+    if (company.vatNumber) setProviderVat(`VAT: ${company.vatNumber}`);
     setProviderQuery(company.name);
     setShowProviderDropdown(false);
   };
@@ -152,8 +128,11 @@ export default function Home() {
     try {
       const res = await fetch(`/api/company-search?q=${encodeURIComponent(val)}`);
       const data = await res.json();
-      setClientSuggestions(data);
-      setShowClientDropdown(data.length > 0);
+      
+      // FIXED: Maps to the new data.results format
+      const results = data.results || [];
+      setClientSuggestions(results);
+      setShowClientDropdown(results.length > 0);
     } catch (err) {
       setClientSuggestions([]);
     } finally {
@@ -230,15 +209,6 @@ export default function Home() {
     reader.readAsDataURL(e.target.files[0]);
   };
 
-  const handleFreeDownloadClick = () => {
-    if (!userEmail.trim() || !userEmail.includes('@')) {
-      setShowEmailError(true);
-      return;
-    }
-    setShowEmailError(false);
-    downloadPdf(true);
-  };
-
   const downloadPdf = async (isWatermarked: boolean) => {
     if (isWatermarked) setIsDownloadingFree(true);
     try {
@@ -267,6 +237,23 @@ export default function Home() {
     } finally {
       if (isWatermarked) setIsDownloadingFree(false);
     }
+  };
+
+  // Safe useEffect for payment handling
+  useEffect(() => {
+    if (hasPaid) {
+      downloadPdf(false);
+      Promise.resolve().then(() => setHasPaid(false));
+    }
+  }, [hasPaid]);
+
+  const handleFreeDownloadClick = () => {
+    if (!userEmail.trim() || !userEmail.includes('@')) {
+      setShowEmailError(true);
+      return;
+    }
+    setShowEmailError(false);
+    downloadPdf(true);
   };
 
   // SEO FAQ Data
@@ -438,7 +425,7 @@ export default function Home() {
               <div className="group flex flex-col items-center space-y-2 cursor-pointer">
                 <div className="w-10 h-10 rounded-xl bg-black/5 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-md">
                   <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3-3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
                 <div>
@@ -520,7 +507,7 @@ export default function Home() {
                             <div className="text-xs font-bold text-gray-900">{item.name}</div>
                             <div className="text-[10px] text-gray-400 truncate max-w-xs">{item.address}</div>
                           </div>
-                          <span className="text-[9px] bg-gray-100 text-gray-600 font-mono px-1.5 py-0.5 rounded">{item.jurisdiction}</span>
+                          <span className="text-[9px] bg-gray-100 text-gray-600 font-mono px-1.5 py-0.5 rounded">{item.source || 'Database'}</span>
                         </div>
                       ))}
                     </div>
@@ -580,7 +567,7 @@ export default function Home() {
                           <div className="text-xs font-bold text-gray-900">{item.name}</div>
                           <div className="text-[10px] text-gray-400 truncate max-w-xs">{item.address}</div>
                         </div>
-                        <span className="text-[9px] bg-gray-100 text-gray-600 font-mono px-1.5 py-0.5 rounded">{item.jurisdiction}</span>
+                        <span className="text-[9px] bg-gray-100 text-gray-600 font-mono px-1.5 py-0.5 rounded">{item.source || 'Database'}</span>
                       </div>
                     ))}
                   </div>
