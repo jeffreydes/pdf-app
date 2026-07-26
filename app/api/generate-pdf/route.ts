@@ -1,5 +1,11 @@
 import puppeteer from 'puppeteer-core';
 
+interface LineItem {
+  description: string;
+  qty: number;
+  price: number;
+}
+
 export async function POST(req: Request) {
   try {
     const data = await req.json();
@@ -9,19 +15,21 @@ export async function POST(req: Request) {
     const validUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     const quoteNumber = `QT-${Math.floor(100000 + Math.random() * 900000)}`;
 
-    // Input values with fallback defaults
+    // Input values with fallbacks
     const clientName = data.clientName || 'Valued Client';
     const clientMeta = data.clientMeta || 'Requested via Quote Generator';
     const providerName = data.providerName || 'Your Company Name';
     const providerEmail = data.providerEmail || 'contact@yourcompany.com';
     const scopeText = data.scopeText || data.prompt || 'Services and deliverables as specified in the proposal agreement.';
 
-    // Price items
-    const item1Price = parseFloat(data.item1Price) || 2450;
-    const item2Price = parseFloat(data.item2Price) || 500;
+    // Dynamic Line Items Calculations
+    const items: LineItem[] = data.items && data.items.length > 0 
+      ? data.items 
+      : [{ description: 'Scope Execution & Deliverables', qty: 1, price: 2450 }];
+
     const vatRate = parseFloat(data.vatRate) || 21;
 
-    const subtotal = item1Price + item2Price;
+    const subtotal = items.reduce((acc, item) => acc + (item.qty * item.price), 0);
     const vatAmount = subtotal * (vatRate / 100);
     const totalDue = subtotal + vatAmount;
 
@@ -43,6 +51,18 @@ export async function POST(req: Request) {
     const watermarkHtml = data.isWatermarked 
       ? `<div class="watermark">PREVIEW DRAFT</div>` 
       : '';
+
+    // Generate Table Rows Dynamically
+    const tableRowsHtml = items.map(item => `
+      <tr>
+        <td>
+          <strong>${item.description}</strong>
+        </td>
+        <td class="text-center">${item.qty}</td>
+        <td class="text-right">${formatCurrency(item.price)}</td>
+        <td class="text-right">${formatCurrency(item.qty * item.price)}</td>
+      </tr>
+    `).join('');
 
     const fullHtml = `
       <!DOCTYPE html>
@@ -266,24 +286,7 @@ export async function POST(req: Request) {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <strong>Scope Execution & Deliverables</strong><br/>
-                  <span style="color:#6B7280; font-size:8.5pt;">Implementation based on provided requirements</span>
-                </td>
-                <td class="text-center">1</td>
-                <td class="text-right">${formatCurrency(item1Price)}</td>
-                <td class="text-right">${formatCurrency(item1Price)}</td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Quality Assurance & Testing</strong><br/>
-                  <span style="color:#6B7280; font-size:8.5pt;">Final review, optimizations, and delivery</span>
-                </td>
-                <td class="text-center">1</td>
-                <td class="text-right">${formatCurrency(item2Price)}</td>
-                <td class="text-right">${formatCurrency(item2Price)}</td>
-              </tr>
+              ${tableRowsHtml}
             </tbody>
           </table>
 
