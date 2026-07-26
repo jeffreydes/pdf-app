@@ -378,7 +378,7 @@ export default function Home() {
                       value={providerQuery} 
                       onChange={(e) => handleProviderSearch(e.target.value)} 
                       onFocus={() => providerSuggestions.length > 0 && setShowProviderDropdown(true)}
-                      placeholder="Search your business (e.g. Studio Des, Acme Corp)..." 
+                      placeholder="Search your business (e.g. bol, Acme Corp)..." 
                       className="flex-1 bg-transparent text-xs font-medium outline-none text-gray-900 placeholder:text-gray-400"
                     />
                     {isSearchingProvider && <span className="text-[10px] text-gray-400 animate-pulse mr-2">Searching...</span>}

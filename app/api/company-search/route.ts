@@ -8,83 +8,90 @@ export async function GET(req: Request) {
     return NextResponse.json([]);
   }
 
+  // 1. Clean query for Belgian corporate suffix variations
   const cleanQuery = rawQuery.replace(/[()]/g, '').trim();
   const baseName = cleanQuery.replace(/\b(commv|bvba|bv|nv|vof|cv|vzw|ltd|inc|llc|gmbh)\b/gi, '').trim();
-  const queryToUse = baseName.length >= 2 ? baseName : cleanQuery;
+  const queryToSearch = baseName.length >= 2 ? baseName : cleanQuery;
 
   try {
     const results: any[] = [];
 
-    // 1. BELGIAN KBO / CBE DATA SEARCH
-    try {
-      const kboRes = await fetch(
-        `https://kbodata.app/api/v1/companies/search?q=${encodeURIComponent(queryToUse)}`,
-        { headers: { 'Accept': 'application/json' } }
-      );
+    // 2. DIRECT SPARQL QUERY TO WIKIDATA'S BELGIAN ENTERPRISE DATASET
+    // P2762 = Belgian CBE/KBO enterprise number
+    // Q31 = Belgium jurisdiction
+    const sparqlQuery = `
+      SELECT DISTINCT ?item ?itemLabel ?cbeNumber ?addressLabel WHERE {
+        {
+          ?item wdt:P31/wdt:P279* wd:Q4830453 . # Business / Enterprise
+          ?item wdt:P17 wd:Q31 .               # Located in Belgium
+          ?item rdfs:label ?itemLabel .
+          FILTER(CONTAINS(LOWER(?itemLabel), LOWER("${queryToSearch}")))
+        }
+        UNION
+        {
+          ?item wdt:P2762 ?cbeNumber .         # Match directly on KBO/CBE number
+          FILTER(CONTAINS(?cbeNumber, "${queryToSearch}"))
+        }
+        OPTIONAL { ?item wdt:P2762 ?cbeNumber . }
+        OPTIONAL { ?item wdt:P6375 ?addressLabel . }
+        FILTER(LANG(?itemLabel) = "en" || LANG(?itemLabel) = "nl" || LANG(?itemLabel) = "fr")
+      }
+      LIMIT 6
+    `;
 
-      if (kboRes.ok) {
-        const kboData = await kboRes.json();
-        const items = Array.isArray(kboData) ? kboData : (kboData.results || kboData.data || []);
+    const wikidataUrl = `https://query.wikidata.org/sparql?query=${encodeURIComponent(sparqlQuery)}&format=json`;
 
-        items.slice(0, 5).forEach((item: any) => {
-          const vatFormatted = item.vatNumber || item.kboNumber || item.enterpriseNumber;
+    const sparqlRes = await fetch(wikidataUrl, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'QuoteBuilderApp/1.0 (https://quotebuilder.app; contact@quotebuilder.app)'
+      }
+    });
+
+    if (sparqlRes.ok) {
+      const sparqlData = await sparqlRes.json();
+      const bindings = sparqlData.results?.bindings || [];
+
+      bindings.forEach((b: any) => {
+        const rawCbe = b.cbeNumber?.value || '';
+        const formattedVat = rawCbe ? `BE ${rawCbe.replace(/[^0-9]/g, '')}` : 'BE (Registered)';
+
+        results.push({
+          name: b.itemLabel?.value || queryToSearch,
+          address: b.addressLabel?.value || 'Belgium',
+          companyNumber: formattedVat,
+          jurisdiction: 'BE',
+        });
+      });
+    }
+
+    // 3. FALLBACK: WIKIDATA SEARCH API (Catches Belgian companies without explicit SPARQL tags)
+    if (results.length === 0) {
+      const fallbackUrl = `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(queryToSearch)}&language=nl&format=json&type=item&limit=5`;
+      const fallbackRes = await fetch(fallbackUrl);
+
+      if (fallbackRes.ok) {
+        const fallbackData = await fallbackRes.json();
+        const searchItems = fallbackData.search || [];
+
+        searchItems.forEach((item: any) => {
           results.push({
-            name: item.name || item.companyName,
-            address: item.address ? `${item.address.street || ''} ${item.address.zip || ''} ${item.address.city || ''}`.trim() : (item.city ? `${item.zip || ''} ${item.city}` : 'Belgium'),
-            companyNumber: vatFormatted ? `BE ${vatFormatted}` : 'BE',
+            name: item.label,
+            address: item.description || 'Belgian Registered Entity',
+            companyNumber: `BE (${item.id})`,
             jurisdiction: 'BE',
           });
         });
       }
-    } catch (e) {}
-
-    // 2. WIKIDATA / WIKIPEDIA GLOBAL API
-    if (results.length === 0) {
-      try {
-        const wikiRes = await fetch(
-          `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(cleanQuery)}&language=en&format=json&type=item&limit=5`
-        );
-
-        if (wikiRes.ok) {
-          const wikiData = await wikiRes.json();
-          if (wikiData.search && wikiData.search.length > 0) {
-            wikiData.search.forEach((item: any) => {
-              results.push({
-                name: item.label,
-                address: item.description || 'Registered Entity',
-                companyNumber: item.id,
-                jurisdiction: 'GLOBAL',
-              });
-            });
-          }
-        }
-      } catch (e) {}
     }
 
-    // 3. OPENCORPORATES FALLBACK
-    if (results.length === 0) {
-      try {
-        const ocRes = await fetch(
-          `https://api.opencorporates.com/v0.4/companies/search?q=${encodeURIComponent(queryToUse)}&per_page=5`
-        );
+    // Deduplicate results by company name
+    const uniqueResults = Array.from(new Set(results.map(r => r.name)))
+      .map(name => results.find(r => r.name === name));
 
-        if (ocRes.ok) {
-          const ocData = await ocRes.json();
-          const companies = ocData.response?.companies || [];
-          companies.forEach((item: any) => {
-            results.push({
-              name: item.company.name,
-              address: item.company.registered_address_in_full || 'Registered Company',
-              companyNumber: item.company.company_number,
-              jurisdiction: (item.company.jurisdiction_code || 'EU').toUpperCase(),
-            });
-          });
-        }
-      } catch (e) {}
-    }
-
-    return NextResponse.json(results);
+    return NextResponse.json(uniqueResults);
   } catch (error) {
+    console.error('Company search error:', error);
     return NextResponse.json([]);
   }
 }
