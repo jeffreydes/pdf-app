@@ -6,7 +6,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "QuoteBuilder | Turn project ideas into client-ready PDF quotes in seconds",
+  title: "QuoteBuilder",
   description: "Create official, client-ready PDF quotes in seconds based on your project idea, hourly rate, or company VAT number. Free preview & instant download.",
   keywords: [
     "quote maker",
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     "hourly rate quote calculator"
   ],
   openGraph: {
-    title: "QuoteBuilder | Create Official PDF Quotes in Seconds",
+    title: "QuoteBuilder",
     description: "Generate professional A4 PDF quotes automatically with AI project estimation and instant company lookup.",
     type: "website",
     locale: "en_US",

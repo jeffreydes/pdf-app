@@ -95,7 +95,6 @@ export default function Home() {
       const res = await fetch(`/api/company-search?q=${encodeURIComponent(val)}`);
       const data = await res.json();
       
-      // FIXED: Maps to the new data.results format
       const results = data.results || [];
       setProviderSuggestions(results);
       setShowProviderDropdown(results.length > 0);
@@ -129,7 +128,6 @@ export default function Home() {
       const res = await fetch(`/api/company-search?q=${encodeURIComponent(val)}`);
       const data = await res.json();
       
-      // FIXED: Maps to the new data.results format
       const results = data.results || [];
       setClientSuggestions(results);
       setShowClientDropdown(results.length > 0);
@@ -239,7 +237,6 @@ export default function Home() {
     }
   };
 
-  // Safe useEffect for payment handling
   useEffect(() => {
     if (hasPaid) {
       downloadPdf(false);
@@ -514,11 +511,11 @@ export default function Home() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <input value={providerName} onChange={(e) => setProviderName(e.target.value)} placeholder="Company Name" className="bg-gray-50 border border-gray-200 rounded-xl p-2 text-xs font-semibold outline-none focus:border-black" />
-                  <input value={providerEmail} onChange={(e) => setProviderEmail(e.target.value)} placeholder="Email" className="bg-gray-50 border border-gray-200 rounded-xl p-2 text-xs outline-none focus:border-black" />
-                  <input value={providerPhone} onChange={(e) => setProviderPhone(e.target.value)} placeholder="Phone" className="bg-gray-50 border border-gray-200 rounded-xl p-2 text-xs outline-none focus:border-black" />
-                  <input value={providerVat} onChange={(e) => setProviderVat(e.target.value)} placeholder="Tax/VAT Number" className="bg-gray-50 border border-gray-200 rounded-xl p-2 text-xs outline-none focus:border-black" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input value={providerName} onChange={(e) => setProviderName(e.target.value)} placeholder="Company Name" className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 sm:p-2 text-xs font-semibold outline-none focus:border-black" />
+                  <input value={providerEmail} onChange={(e) => setProviderEmail(e.target.value)} placeholder="Email" className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 sm:p-2 text-xs outline-none focus:border-black" />
+                  <input value={providerPhone} onChange={(e) => setProviderPhone(e.target.value)} placeholder="Phone" className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 sm:p-2 text-xs outline-none focus:border-black" />
+                  <input value={providerVat} onChange={(e) => setProviderVat(e.target.value)} placeholder="Tax/VAT Number" className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 sm:p-2 text-xs outline-none focus:border-black" />
                 </div>
                 <input value={providerAddress} onChange={(e) => setProviderAddress(e.target.value)} placeholder="Business Address" className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2 text-xs outline-none focus:border-black" />
               </div>
@@ -575,12 +572,12 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Client Contact Name" className="bg-gray-50 border border-gray-200 rounded-xl p-2 text-xs font-semibold outline-none focus:border-black" />
-                <input value={clientCompany} onChange={(e) => setClientCompany(e.target.value)} placeholder="Client Company Name" className="bg-gray-50 border border-gray-200 rounded-xl p-2 text-xs outline-none focus:border-black" />
-                <input value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="Client Email" className="bg-gray-50 border border-gray-200 rounded-xl p-2 text-xs outline-none focus:border-black" />
-                <input value={clientAddress} onChange={(e) => setClientAddress(e.target.value)} placeholder="Billing Address" className="bg-gray-50 border border-gray-200 rounded-xl p-2 text-xs outline-none focus:border-black" />
+                <input value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Client Contact Name" className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 sm:p-2 text-xs font-semibold outline-none focus:border-black" />
+                <input value={clientCompany} onChange={(e) => setClientCompany(e.target.value)} placeholder="Client Company Name" className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 sm:p-2 text-xs outline-none focus:border-black" />
+                <input value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="Client Email" className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 sm:p-2 text-xs outline-none focus:border-black" />
+                <input value={clientAddress} onChange={(e) => setClientAddress(e.target.value)} placeholder="Billing Address" className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 sm:p-2 text-xs outline-none focus:border-black" />
               </div>
-              <input value={projectTimeline} onChange={(e) => setProjectTimeline(e.target.value)} placeholder="Project Timeline & Milestones" className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2 text-xs outline-none focus:border-black" />
+              <input value={projectTimeline} onChange={(e) => setProjectTimeline(e.target.value)} placeholder="Project Timeline & Milestones" className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 sm:p-2 text-xs outline-none focus:border-black" />
             </div>
 
             <div className="flex justify-between pt-4">
@@ -606,17 +603,30 @@ export default function Home() {
 
               <div className="space-y-3">
                 {items.map((item) => (
-                  <div key={item.id} className="flex gap-2 items-center bg-gray-50/80 p-2 rounded-xl border border-gray-200/60">
-                    <input value={item.description} onChange={(e) => updateItem(item.id, 'description', e.target.value)} placeholder="Phase / Deliverable" className="flex-1 bg-white border border-gray-200 rounded-lg p-2 text-xs font-medium outline-none focus:border-black" />
-                    <div className="relative">
-                      <input type="number" value={item.qty} onChange={(e) => updateItem(item.id, 'qty', parseInt(e.target.value) || 0)} className="w-16 bg-white border border-gray-200 rounded-lg p-2 pr-6 text-xs font-bold text-center outline-none focus:border-black" />
-                      <span className="absolute right-1.5 top-2 text-[9px] text-gray-400 font-semibold">hrs</span>
+                  <div key={item.id} className="flex flex-col sm:flex-row gap-2 sm:items-center bg-gray-50/80 p-3 sm:p-2 rounded-xl border border-gray-200/60">
+                    <input 
+                      value={item.description} 
+                      onChange={(e) => updateItem(item.id, 'description', e.target.value)} 
+                      placeholder="Phase / Deliverable" 
+                      className="w-full sm:flex-1 bg-white border border-gray-200 rounded-lg p-2.5 sm:p-2 text-xs font-medium outline-none focus:border-black" 
+                    />
+                    <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+                      <div className="flex items-center gap-2">
+                        <div className="relative">
+                          <input type="number" value={item.qty} onChange={(e) => updateItem(item.id, 'qty', parseInt(e.target.value) || 0)} className="w-[4.5rem] sm:w-16 bg-white border border-gray-200 rounded-lg p-2.5 sm:p-2 pr-6 text-xs font-bold text-center outline-none focus:border-black" />
+                          <span className="absolute right-2 top-2.5 sm:top-2 text-[9px] text-gray-400 font-semibold">hrs</span>
+                        </div>
+                        <div className="relative">
+                          <input type="number" value={item.price} onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)} className="w-[5.5rem] sm:w-20 bg-white border border-gray-200 rounded-lg p-2.5 sm:p-2 pr-7 text-xs font-bold outline-none focus:border-black" />
+                          <span className="absolute right-2 top-2.5 sm:top-2 text-[9px] text-gray-400 font-semibold">€/h</span>
+                        </div>
+                      </div>
+                      {items.length > 1 && (
+                        <button onClick={() => removeItem(item.id)} className="text-gray-400 hover:text-red-500 font-bold p-2 text-sm bg-white sm:bg-transparent border sm:border-none border-gray-200 rounded-lg shadow-sm sm:shadow-none transition-colors">
+                          ✕
+                        </button>
+                      )}
                     </div>
-                    <div className="relative">
-                      <input type="number" value={item.price} onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)} className="w-20 bg-white border border-gray-200 rounded-lg p-2 pr-6 text-xs font-bold outline-none focus:border-black" />
-                      <span className="absolute right-1.5 top-2 text-[9px] text-gray-400 font-semibold">€/h</span>
-                    </div>
-                    {items.length > 1 && <button onClick={() => removeItem(item.id)} className="text-gray-400 hover:text-red-500 font-bold px-2 text-sm">✕</button>}
                   </div>
                 ))}
               </div>
