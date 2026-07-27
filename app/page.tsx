@@ -313,13 +313,13 @@ export default function Home() {
       {/* MAIN CONTAINER LOCKED TO SCREEN HEIGHT FOR PERFECT CENTERING */}
       <main className="flex-1 max-w-3xl w-full mx-auto px-6 flex flex-col justify-between min-h-[calc(100vh-80px)] relative z-10">
         
-        {/* DYNAMIC, PERSISTENT HUE-SHIFTING BACKGROUND GRADIENT */}
+        {/* DYNAMIC, PERSISTENT HUE-SHIFTING BACKGROUND GRADIENT (FIXED TO BE A PERFECT CIRCLE) */}
         <div 
-          className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-tr from-sky-300/40 via-indigo-300/30 to-cyan-300/40 blur-[80px] rounded-full pointer-events-none -z-10 transition-all duration-1000 ease-in-out ${
-            currentStep === 1 ? 'w-[120%] h-[120%] scale-100 opacity-60' :
-            currentStep === 2 ? 'w-[120%] h-[120%] scale-110 opacity-70' :
-            currentStep === 3 ? 'w-[120%] h-[120%] scale-125 opacity-80 bg-gradient-to-tr from-sky-400/40 via-indigo-400/30 to-cyan-400/40' :
-            'w-[120%] h-[120%] scale-150 opacity-90 bg-gradient-to-tr from-blue-400/40 via-indigo-400/40 to-cyan-400/40'
+          className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none -z-10 transition-all duration-1000 ease-in-out blur-[80px] sm:blur-[120px] w-[600px] h-[600px] sm:w-[900px] sm:h-[900px] ${
+            currentStep === 1 ? 'scale-100 opacity-50 bg-gradient-to-tr from-sky-300/60 via-indigo-300/40 to-cyan-300/60' :
+            currentStep === 2 ? 'scale-110 opacity-60 bg-gradient-to-tr from-sky-300/60 via-indigo-300/50 to-cyan-300/60' :
+            currentStep === 3 ? 'scale-125 opacity-70 bg-gradient-to-tr from-sky-400/50 via-indigo-400/50 to-cyan-400/50' :
+            'scale-150 opacity-80 bg-gradient-to-tr from-blue-400/50 via-indigo-400/50 to-cyan-400/50'
           }`} 
         />
 
@@ -643,10 +643,10 @@ export default function Home() {
                     ))}
                   </div>
 
-                  {/* PROMINENT CURRENCY TOGGLE & VAT SELECTION */}
+                  {/* PROMINENT CURRENCY TOGGLE & CUSTOM VAT SELECTION */}
                   <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-3 w-full sm:w-auto">
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-500 font-medium w-16">Currency:</span>
                         <div className="flex bg-gray-100 p-0.5 rounded-lg border border-gray-200">
@@ -667,12 +667,23 @@ export default function Home() {
 
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-500 font-medium w-16">VAT Rate:</span>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1.5 sm:gap-2">
                           {[0, 9, 21].map((rate) => (
                             <button key={rate} onClick={() => setVatRate(rate)} className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all ${vatRate === rate ? 'bg-black text-white border-black' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}`}>
                               {rate}%
                             </button>
                           ))}
+                          {/* MANUAL VAT INPUT */}
+                          <div className="relative">
+                            <input 
+                              type="number" 
+                              value={vatRate} 
+                              onChange={(e) => setVatRate(Math.max(0, parseFloat(e.target.value) || 0))} 
+                              className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-14 sm:w-16 py-1 pl-2 pr-4 rounded-lg text-xs font-bold border transition-all outline-none text-center ${![0, 9, 21].includes(vatRate) ? 'bg-black text-white border-black shadow-sm' : 'bg-gray-50 text-gray-600 border-gray-200 focus:border-black focus:bg-white'}`}
+                              placeholder="0"
+                            />
+                            <span className={`absolute right-1.5 top-1.5 text-[10px] font-bold pointer-events-none ${![0, 9, 21].includes(vatRate) ? 'text-white/70' : 'text-gray-400'}`}>%</span>
+                          </div>
                         </div>
                       </div>
                     </div>
