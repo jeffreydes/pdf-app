@@ -14,6 +14,9 @@ export default function Home() {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [currency, setCurrency] = useState<'EUR' | 'USD'>('EUR');
 
+  // Pro Subscription State
+  const [isPro, setIsPro] = useState(false);
+
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isDownloadingFree, setIsDownloadingFree] = useState(false);
@@ -68,6 +71,13 @@ export default function Home() {
   const vatAmount = subtotal * (vatRate / 100);
   const totalDue = subtotal + vatAmount;
 
+  // Initialize Pro status from local storage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsPro(window.localStorage.getItem('isPro') === 'true');
+    }
+  }, []);
+
   // Dynamic currency formatting based on selection
   const formatCurrency = (amount: number) => {
     const locale = currency === 'EUR' ? 'de-DE' : 'en-US';
@@ -79,7 +89,18 @@ export default function Home() {
       (window as any).createLemonSqueezy();
       (window as any).LemonSqueezy?.Setup({
         eventHandler: (event: any) => {
-          if (event.event === 'Checkout.Success') setHasPaid(true);
+          if (event.event === 'Checkout.Success') {
+            // Check if they bought the monthly sub or the single PDF
+            const checkoutType = window.localStorage.getItem('checkoutType');
+            
+            if (checkoutType === 'pro') {
+              window.localStorage.setItem('isPro', 'true');
+              setIsPro(true);
+            }
+            
+            // Regardless of what they bought, trigger the current download
+            setHasPaid(true);
+          }
         }
       });
     }
@@ -288,8 +309,24 @@ export default function Home() {
           <span className="font-bold text-sm tracking-tight text-gray-900 hidden sm:block">QuoteBuilder</span>
         </div>
 
-        {/* WIZARD STEPS */}
-        <div className="flex items-center gap-4 sm:gap-6">
+        {/* CONTROLS (PRO BUTTON, CURRENCY, WIZARD) */}
+        <div className="flex items-center gap-3 sm:gap-6">
+          
+          {/* MONTHLY SUBSCRIPTION BUTTON */}
+          {!isPro ? (
+            <a 
+              href="https://desmindspace.lemonsqueezy.com/checkout/buy/e5319fca-00c7-4959-89ee-6ba719d2c0a4?embed=1" 
+              onClick={() => { if(typeof window !== 'undefined') window.localStorage.setItem('checkoutType', 'pro'); }}
+              className="lemonsqueezy-button px-4 py-1.5 bg-[#0070F3] hover:bg-[#005bb5] text-white text-xs font-bold rounded-lg shadow-md transition-all active:scale-95"
+            >
+              Go Pro
+            </a>
+          ) : (
+            <span className="px-3 py-1 bg-green-100 text-green-700 border border-green-200 text-xs font-bold rounded-lg shadow-sm">
+              PRO ACTIVE
+            </span>
+          )}
+
           <div className="flex items-center gap-1.5 sm:gap-2">
             {[1, 2, 3, 4].map((step) => (
               <button
@@ -741,17 +778,27 @@ export default function Home() {
                         )}
                       </button>
 
-                      <a 
-                        href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
-                        className="lemonsqueezy-button flex-1 sm:flex-none py-3 px-5 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
-                      >
-                        Download Full PDF
-                      </a>
+                      {isPro ? (
+                        <button 
+                          onClick={() => downloadPdf(false)}
+                          className="flex-1 sm:flex-none py-3 px-5 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
+                        >
+                          Download Official PDF (Pro)
+                        </button>
+                      ) : (
+                        <a 
+                          href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
+                          onClick={() => { if(typeof window !== 'undefined') window.localStorage.setItem('checkoutType', 'single'); }}
+                          className="lemonsqueezy-button flex-1 sm:flex-none py-3 px-5 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
+                        >
+                          Download Full PDF
+                        </a>
+                      )}
                     </div>
                   </div>
 
                   <p className="text-[10px] text-gray-400 text-center pt-2">
-                    Free download includes a subtle watermark and signature preview block. Upgrade removes all watermarks for official client delivery.
+                    {isPro ? "Your Pro account has removed all watermarks for official client delivery." : "Free download includes a subtle watermark and signature preview block. Upgrade removes all watermarks for official client delivery."}
                   </p>
                 </div>
               </div>
