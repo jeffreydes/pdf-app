@@ -12,6 +12,7 @@ interface LineItem {
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [currency, setCurrency] = useState<'EUR' | 'USD'>('EUR');
 
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -67,8 +68,11 @@ export default function Home() {
   const vatAmount = subtotal * (vatRate / 100);
   const totalDue = subtotal + vatAmount;
 
-  const formatCurrency = (amount: number) => 
-    new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
+  // Dynamic currency formatting based on selection
+  const formatCurrency = (amount: number) => {
+    const locale = currency === 'EUR' ? 'de-DE' : 'en-US';
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(amount);
+  };
 
   const handleLemonSqueezyScriptLoad = () => {
     if (typeof window !== 'undefined' && (window as any).createLemonSqueezy) {
@@ -152,7 +156,7 @@ export default function Home() {
     if (!activePrompt.trim()) return;
     setIsLoading(true);
 
-    const rateMatch = activePrompt.match(/(?:rate|hourly|fee|€|eur)\s*:?\s*(\d+)/i) || 
+    const rateMatch = activePrompt.match(/(?:rate|hourly|fee|€|\$|eur|usd)\s*:?\s*(\d+)/i) || 
                       activePrompt.match(/(\d+)\s*(?:\/|per)?\s*(?:u|h|uur|hour)/i);
     const baseRate = rateMatch ? parseInt(rateMatch[1], 10) : 85;
 
@@ -214,7 +218,7 @@ export default function Home() {
         prompt, logo, clientName, clientCompany, clientAddress, clientEmail,
         providerName, providerAddress, providerPhone, providerEmail, providerVat,
         projectTimeline, scopeText: scopeText || prompt, items, vatRate, isWatermarked,
-        leadEmail: userEmail
+        leadEmail: userEmail, currency // Added currency to payload!
       };
 
       const response = await fetch('/api/generate-pdf', {
@@ -278,29 +282,46 @@ export default function Home() {
       <Script src="https://assets.lemonsqueezy.com/lemon.js" strategy="afterInteractive" onReady={handleLemonSqueezyScriptLoad} />
 
       {/* HEADER */}
-      <header className="bg-white/80 border-b border-gray-200/80 px-8 py-4 flex justify-between items-center shadow-sm sticky top-0 z-50 backdrop-blur-md">
+      <header className="bg-white/80 border-b border-gray-200/80 px-4 sm:px-8 py-4 flex justify-between items-center shadow-sm sticky top-0 z-50 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 bg-black rounded-lg flex items-center justify-center text-white font-black text-xs">Q</div>
-          <span className="font-bold text-sm tracking-tight text-gray-900">QuoteBuilder</span>
+          <span className="font-bold text-sm tracking-tight text-gray-900 hidden sm:block">QuoteBuilder</span>
         </div>
 
-        {/* WIZARD STEP INDICATOR */}
-        <div className="flex items-center gap-2">
-          {[1, 2, 3, 4].map((step) => (
-            <button
-              key={step}
-              onClick={() => step <= currentStep && setCurrentStep(step)}
-              className={`w-7 h-7 rounded-full text-xs font-bold transition-all flex items-center justify-center ${
-                currentStep === step 
-                  ? 'bg-black text-white shadow-sm' 
-                  : currentStep > step 
-                  ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' 
-                  : 'bg-gray-100 text-gray-300 cursor-not-allowed'
-              }`}
+        {/* CURRENCY TOGGLE & WIZARD STEPS */}
+        <div className="flex items-center gap-4 sm:gap-6">
+          <div className="flex bg-gray-100 p-0.5 rounded-lg border border-gray-200">
+            <button 
+              onClick={() => setCurrency('EUR')} 
+              className={`px-2.5 py-1 text-xs font-bold rounded-md transition-all ${currency === 'EUR' ? 'bg-white shadow-sm text-black' : 'text-gray-400 hover:text-gray-600'}`}
             >
-              {step}
+              €
             </button>
-          ))}
+            <button 
+              onClick={() => setCurrency('USD')} 
+              className={`px-2.5 py-1 text-xs font-bold rounded-md transition-all ${currency === 'USD' ? 'bg-white shadow-sm text-black' : 'text-gray-400 hover:text-gray-600'}`}
+            >
+              $
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {[1, 2, 3, 4].map((step) => (
+              <button
+                key={step}
+                onClick={() => step <= currentStep && setCurrentStep(step)}
+                className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center ${
+                  currentStep === step 
+                    ? 'bg-black text-white shadow-sm' 
+                    : currentStep > step 
+                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' 
+                    : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                }`}
+              >
+                {step}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -353,7 +374,7 @@ export default function Home() {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
-                  placeholder="e.g. Logo design for brand, hourly rate 50..." 
+                  placeholder={`e.g. Logo design for brand, hourly rate 50...`} 
                   className="w-full bg-transparent text-sm sm:text-base outline-none text-gray-900 placeholder:text-gray-400 font-medium"
                 />
 
@@ -435,13 +456,10 @@ export default function Home() {
           </div>
         )}
 
-        {/* STEPS 2, 3, & 4 HERO TITLE HEADER */}
+        {/* STEPS 2, 3, & 4 INSTRUCTIONS ONLY (Title Removed) */}
         {currentStep > 1 && (
-          <div className="text-center my-6 space-y-2">
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900">
-              Your idea to a functional quote in seconds.
-            </h1>
-            <p className="text-sm text-gray-500 max-w-md mx-auto">
+          <div className="text-center my-6">
+            <p className="text-sm font-medium text-gray-500 max-w-md mx-auto bg-gray-100/50 inline-block px-4 py-1.5 rounded-full border border-gray-200/50">
               {currentStep === 2 && "Search or enter your business details and brand logo."}
               {currentStep === 3 && "Select or type your client's company information."}
               {currentStep === 4 && "Review project line items, hours, and finalized totals."}
@@ -618,7 +636,7 @@ export default function Home() {
                         </div>
                         <div className="relative">
                           <input type="number" value={item.price} onChange={(e) => updateItem(item.id, 'price', parseFloat(e.target.value) || 0)} className="w-[5.5rem] sm:w-20 bg-white border border-gray-200 rounded-lg p-2.5 sm:p-2 pr-7 text-xs font-bold outline-none focus:border-black" />
-                          <span className="absolute right-2 top-2.5 sm:top-2 text-[9px] text-gray-400 font-semibold">€/h</span>
+                          <span className="absolute right-2 top-2.5 sm:top-2 text-[9px] text-gray-400 font-semibold">{currency === 'EUR' ? '€/h' : '$/h'}</span>
                         </div>
                       </div>
                       {items.length > 1 && (
