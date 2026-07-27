@@ -6,7 +6,7 @@ import AnalyticsWrapper from "./AnalyticsWrapper";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "QuoteBuilder",
+  title: "QuoteBuilder | AI-Powered PDF Quotes",
   description: "Create official, client-ready PDF quotes in seconds based on your project idea, hourly rate, or company VAT number. Free preview & instant download.",
   keywords: [
     "quote maker",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: 'https://www.yourdomain.com', 
+    canonical: 'https://www.pdfbuilder.org', 
   }
 };
 
