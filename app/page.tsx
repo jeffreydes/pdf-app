@@ -24,10 +24,6 @@ export default function Home() {
   const [hasPaid, setHasPaid] = useState(false);
   const [logo, setLogo] = useState<string | null>(null);
 
-  // Lead Capture Email for Free Download
-  const [userEmail, setUserEmail] = useState('');
-  const [showEmailError, setShowEmailError] = useState(false);
-
   // FAQ Accordion State
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -91,7 +87,6 @@ export default function Home() {
       (window as any).LemonSqueezy?.Setup({
         eventHandler: (event: any) => {
           if (event.event === 'Checkout.Success') {
-            // Check if they bought the monthly sub or the single PDF
             const checkoutType = window.localStorage.getItem('checkoutType');
             
             if (checkoutType === 'pro') {
@@ -99,7 +94,6 @@ export default function Home() {
               setIsPro(true);
             }
             
-            // Regardless of what they bought, trigger the current download
             setHasPaid(true);
           }
         }
@@ -239,8 +233,7 @@ export default function Home() {
       const payload = {
         prompt, logo, clientName, clientCompany, clientAddress, clientEmail,
         providerName, providerAddress, providerPhone, providerEmail, providerVat,
-        projectTimeline, scopeText: scopeText || prompt, items, vatRate, isWatermarked,
-        leadEmail: userEmail, currency
+        projectTimeline, scopeText: scopeText || prompt, items, vatRate, isWatermarked, currency
       };
 
       const response = await fetch('/api/generate-pdf', {
@@ -263,7 +256,6 @@ export default function Home() {
     }
   };
 
-  // Safe useEffect for payment handling met admin uitsluiting
   useEffect(() => {
     if (hasPaid) {
       if (typeof window !== 'undefined' && window.localStorage.getItem('isAdmin') !== 'true') {
@@ -275,13 +267,6 @@ export default function Home() {
   }, [hasPaid]);
 
   const handleFreeDownloadClick = () => {
-    if (!userEmail.trim() || !userEmail.includes('@')) {
-      setShowEmailError(true);
-      return;
-    }
-    setShowEmailError(false);
-    
-    // Alleen meten als het geen admin is
     if (typeof window !== 'undefined' && window.localStorage.getItem('isAdmin') !== 'true') {
       track('Free_Download_Clicked');
     }
@@ -342,13 +327,11 @@ export default function Home() {
             ))}
           </div>
 
-          {/* MONTHLY SUBSCRIPTION BUTTON WITH PULSING GLOW */}
+          {/* MONTHLY SUBSCRIPTION BUTTON */}
           {!isPro ? (
             <div className="relative group inline-flex">
-              {/* PULSING BACKGROUND GLOW */}
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-500 rounded-lg blur opacity-60 group-hover:opacity-100 animate-pulse transition duration-500"></div>
               
-              {/* BUTTON */}
               <a 
                 href="https://desmindspace.lemonsqueezy.com/checkout/buy/e5319fca-00c7-4959-89ee-6ba719d2c0a4?embed=1" 
                 onClick={() => { if(typeof window !== 'undefined') window.localStorage.setItem('checkoutType', 'pro'); }}
@@ -366,10 +349,10 @@ export default function Home() {
         </div>
       </header>
 
-      {/* MAIN CONTAINER LOCKED TO SCREEN HEIGHT FOR PERFECT CENTERING */}
+      {/* MAIN CONTAINER */}
       <main className="flex-1 max-w-3xl w-full mx-auto px-6 flex flex-col justify-between min-h-[calc(100vh-80px)] relative z-10">
         
-        {/* DYNAMIC, PERSISTENT HUE-SHIFTING BACKGROUND GRADIENT (FIXED TO BE A PERFECT CIRCLE) */}
+        {/* DYNAMIC BACKGROUND GRADIENT */}
         <div 
           className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none -z-10 transition-all duration-1000 ease-in-out blur-[80px] sm:blur-[120px] w-[600px] h-[600px] sm:w-[900px] sm:h-[900px] ${
             currentStep === 1 ? 'scale-100 opacity-50 bg-gradient-to-tr from-sky-300/60 via-indigo-300/40 to-cyan-300/60' :
@@ -379,10 +362,9 @@ export default function Home() {
           }`} 
         />
 
-        {/* STEP 1: TITLE, SUBTITLE & SEARCH GROUPED IN CENTER */}
+        {/* STEP 1 */}
         {currentStep === 1 && (
           <div className="my-auto space-y-8 relative py-8">
-            {/* TRUSTPILOT-STYLE SOCIAL PROOF RATING BADGE */}
             <div className="flex justify-center">
               <div className="inline-flex items-center gap-2.5 bg-white/90 border border-gray-200/80 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-xs hover:border-gray-300 transition-all cursor-default">
                 <div className="flex items-center gap-0.5">
@@ -434,7 +416,7 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* PROGRAMMATIC SEO PRESET CHIPS */}
+              {/* QUICK PRESETS */}
               <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
                 <span className="text-[11px] text-gray-400 font-medium">Quick Presets:</span>
                 {[
@@ -457,10 +439,9 @@ export default function Home() {
               </div>
             </div>
 
-            {/* ORGANIC TRACTION / SEO HIGHLIGHTS WITH ANIMATED ICONS */}
+            {/* FEATURES */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-gray-200/60 text-center">
               
-              {/* Feature 1: AI Estimation */}
               <div className="group flex flex-col items-center space-y-2 cursor-pointer">
                 <div className="w-10 h-10 rounded-xl bg-black/5 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-md">
                   <svg className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -473,7 +454,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Feature 2: Company Search */}
               <div className="group flex flex-col items-center space-y-2 cursor-pointer">
                 <div className="w-10 h-10 rounded-xl bg-black/5 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-md">
                   <svg className="w-5 h-5 transition-transform duration-300 group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -486,7 +466,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Feature 3: PDF Export */}
               <div className="group flex flex-col items-center space-y-2 cursor-pointer">
                 <div className="w-10 h-10 rounded-xl bg-black/5 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-all duration-300 transform group-hover:-translate-y-1 group-hover:shadow-md">
                   <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -503,11 +482,10 @@ export default function Home() {
           </div>
         )}
 
-        {/* STEPS 2, 3, & 4 UNIFIED WRAPPER FOR PERFECT VERTICAL CENTERING */}
+        {/* STEPS 2, 3, & 4 */}
         {currentStep > 1 && (
           <div className="my-auto space-y-6 w-full py-8">
             
-            {/* INSTRUCTIONS PILL */}
             <div className="text-center">
               <p className="text-sm font-medium text-gray-500 max-w-md mx-auto bg-gray-100/80 backdrop-blur-sm inline-block px-4 py-1.5 rounded-full border border-gray-200/50 shadow-sm">
                 {currentStep === 2 && "Search or enter your business details and brand logo."}
@@ -516,7 +494,7 @@ export default function Home() {
               </p>
             </div>
 
-            {/* STEP 2: PROVIDER & BRAND DETAILS */}
+            {/* STEP 2: PROVIDER DETAILS */}
             {currentStep === 2 && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -595,7 +573,7 @@ export default function Home() {
               </div>
             )}
 
-            {/* STEP 3: CLIENT & TIMELINE DETAILS */}
+            {/* STEP 3: CLIENT DETAILS */}
             {currentStep === 3 && (
               <div className="space-y-6">
                 <div className="bg-white/90 backdrop-blur-sm border border-gray-200/80 rounded-2xl p-5 shadow-sm space-y-4">
@@ -654,7 +632,7 @@ export default function Home() {
               </div>
             )}
 
-            {/* STEP 4: SCOPE, PRICING & IN-BOX MONETIZATION BUTTONS */}
+            {/* STEP 4: SCOPE, PRICING & EXPORT */}
             {currentStep === 4 && (
               <div className="space-y-6">
                 <div className="bg-white/90 backdrop-blur-sm border border-gray-200/80 rounded-2xl p-5 shadow-sm">
@@ -679,7 +657,6 @@ export default function Home() {
                         />
                         <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                           <div className="flex items-center gap-2">
-                            {/* [appearance:textfield] and pseudo-classes hide the ugly native spin arrows */}
                             <div className="relative">
                               <input type="number" value={item.qty} onChange={(e) => updateItem(item.id, 'qty', parseInt(e.target.value) || 0)} className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[4.5rem] sm:w-16 bg-white border border-gray-200 rounded-lg p-2.5 sm:p-2 pr-7 text-xs font-bold text-center outline-none focus:border-black" />
                               <span className="absolute right-2 top-2.5 sm:top-2 text-[9px] text-gray-400 font-semibold pointer-events-none">hrs</span>
@@ -699,7 +676,7 @@ export default function Home() {
                     ))}
                   </div>
 
-                  {/* PROMINENT CURRENCY TOGGLE & CUSTOM VAT SELECTION */}
+                  {/* CURRENCY TOGGLE & VAT SELECTION */}
                   <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     
                     <div className="flex flex-col gap-3 w-full sm:w-auto">
@@ -729,7 +706,6 @@ export default function Home() {
                               {rate}%
                             </button>
                           ))}
-                          {/* MANUAL VAT INPUT */}
                           <div className="relative">
                             <input 
                               type="number" 
@@ -752,24 +728,11 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* LEAD CAPTURE & MONETIZATION CHECKOUT BLOCK */}
+                {/* EXPORT OPTIONS */}
                 <div className="bg-white/90 backdrop-blur-sm border border-gray-200/80 rounded-2xl p-5 shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-gray-900">Export Options</span>
                     <span className="text-[10px] text-gray-400 font-medium">Instant High-Resolution A4 PDF</span>
-                  </div>
-
-                  {/* LEAD CAPTURE EMAIL FIELD */}
-                  <div>
-                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Your Email (To receive draft updates)</label>
-                    <input 
-                      type="email" 
-                      value={userEmail}
-                      onChange={(e) => setUserEmail(e.target.value)}
-                      placeholder="you@company.com" 
-                      className={`w-full bg-gray-50 border ${showEmailError ? 'border-red-500' : 'border-gray-200'} rounded-xl p-2.5 text-xs outline-none focus:border-black font-medium`}
-                    />
-                    {showEmailError && <p className="text-[10px] text-red-500 mt-1">Please enter a valid email address to download your free quote.</p>}
                   </div>
 
                   {/* ACTION BUTTONS */}
@@ -817,7 +780,7 @@ export default function Home() {
                   </div>
 
                   <p className="text-[10px] text-gray-400 text-center pt-2">
-                    {isPro ? "Your Pro account has removed all watermarks for official client delivery." : "Free download includes a subtle watermark and signature preview block. Upgrade removes all watermarks for official client delivery."}
+                    {isPro ? "Your Pro account has removed all watermarks for official client delivery." : "Free download includes a subtle watermark. Upgrade removes all watermarks for official client delivery."}
                   </p>
                 </div>
               </div>
@@ -828,7 +791,7 @@ export default function Home() {
 
       </main>
 
-      {/* COMPACT & LOW-PROFILE FAQ AT THE VERY BOTTOM BELOW THE FOLD */}
+      {/* FAQ FOOTER */}
       <footer className="w-full bg-white border-t border-gray-200/60 py-16 mt-20 relative z-20">
         <div className="max-w-2xl mx-auto px-6 space-y-6">
           <div className="text-center space-y-1">
