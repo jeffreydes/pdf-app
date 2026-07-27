@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
+import AnalyticsWrapper from "./AnalyticsWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -57,7 +57,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         {children}
-        <Analytics />
+        <AnalyticsWrapper />
       </body>
     </html>
   );
