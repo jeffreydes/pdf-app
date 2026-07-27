@@ -309,24 +309,10 @@ export default function Home() {
           <span className="font-bold text-sm tracking-tight text-gray-900 hidden sm:block">QuoteBuilder</span>
         </div>
 
-        {/* CONTROLS (PRO BUTTON, CURRENCY, WIZARD) */}
-        <div className="flex items-center gap-3 sm:gap-6">
+        {/* CONTROLS (WIZARD & PRO BUTTON) */}
+        <div className="flex items-center gap-4 sm:gap-6">
           
-          {/* MONTHLY SUBSCRIPTION BUTTON */}
-          {!isPro ? (
-            <a 
-              href="https://desmindspace.lemonsqueezy.com/checkout/buy/e5319fca-00c7-4959-89ee-6ba719d2c0a4?embed=1" 
-              onClick={() => { if(typeof window !== 'undefined') window.localStorage.setItem('checkoutType', 'pro'); }}
-              className="lemonsqueezy-button px-4 py-1.5 bg-[#0070F3] hover:bg-[#005bb5] text-white text-xs font-bold rounded-lg shadow-md transition-all active:scale-95"
-            >
-              Go Pro
-            </a>
-          ) : (
-            <span className="px-3 py-1 bg-green-100 text-green-700 border border-green-200 text-xs font-bold rounded-lg shadow-sm">
-              PRO ACTIVE
-            </span>
-          )}
-
+          {/* WIZARD STEPS */}
           <div className="flex items-center gap-1.5 sm:gap-2">
             {[1, 2, 3, 4].map((step) => (
               <button
@@ -344,6 +330,28 @@ export default function Home() {
               </button>
             ))}
           </div>
+
+          {/* MONTHLY SUBSCRIPTION BUTTON WITH PULSING GLOW */}
+          {!isPro ? (
+            <div className="relative group inline-flex">
+              {/* PULSING BACKGROUND GLOW */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-500 rounded-lg blur opacity-60 group-hover:opacity-100 animate-pulse transition duration-500"></div>
+              
+              {/* BUTTON */}
+              <a 
+                href="https://desmindspace.lemonsqueezy.com/checkout/buy/e5319fca-00c7-4959-89ee-6ba719d2c0a4?embed=1" 
+                onClick={() => { if(typeof window !== 'undefined') window.localStorage.setItem('checkoutType', 'pro'); }}
+                className="lemonsqueezy-button relative px-4 py-1.5 bg-[#0070F3] hover:bg-[#005bb5] text-white text-xs font-bold rounded-lg shadow-sm transition-all active:scale-95"
+              >
+                Go Pro
+              </a>
+            </div>
+          ) : (
+            <span className="px-3 py-1 bg-green-100 text-green-700 border border-green-200 text-xs font-bold rounded-lg shadow-sm">
+              PRO ACTIVE
+            </span>
+          )}
+
         </div>
       </header>
 
