@@ -2,6 +2,7 @@
 
 import { useState, ChangeEvent, useEffect } from 'react';
 import Script from 'next/script';
+import { track } from '@vercel/analytics';
 
 interface LineItem {
   id: string;
@@ -262,8 +263,12 @@ export default function Home() {
     }
   };
 
+  // Safe useEffect for payment handling met admin uitsluiting
   useEffect(() => {
     if (hasPaid) {
+      if (typeof window !== 'undefined' && window.localStorage.getItem('isAdmin') !== 'true') {
+        track('Paid_Download_Success');
+      }
       downloadPdf(false);
       Promise.resolve().then(() => setHasPaid(false));
     }
@@ -275,6 +280,12 @@ export default function Home() {
       return;
     }
     setShowEmailError(false);
+    
+    // Alleen meten als het geen admin is
+    if (typeof window !== 'undefined' && window.localStorage.getItem('isAdmin') !== 'true') {
+      track('Free_Download_Clicked');
+    }
+
     downloadPdf(true);
   };
 
