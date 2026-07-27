@@ -75,6 +75,18 @@ export default function Home() {
     }
   }, []);
 
+  // Re-scan DOM for Lemon Squeezy overlay links whenever the step changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const timer = setTimeout(() => {
+        if ((window as any).createLemonSqueezy) {
+          (window as any).createLemonSqueezy();
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep]);
+
   // Dynamic currency formatting based on selection
   const formatCurrency = (amount: number) => {
     const locale = currency === 'EUR' ? 'de-DE' : 'en-US';
@@ -251,7 +263,7 @@ export default function Home() {
       a.click();
     } catch (error: any) { 
       alert('Error: ' + error.message); 
-    } finally {
+    } fontally {
       if (isWatermarked) setIsDownloadingFree(false);
     }
   };
@@ -334,8 +346,12 @@ export default function Home() {
               
               <a 
                 href="https://desmindspace.lemonsqueezy.com/checkout/buy/e5319fca-00c7-4959-89ee-6ba719d2c0a4?embed=1" 
-                onClick={() => { if(typeof window !== 'undefined') window.localStorage.setItem('checkoutType', 'pro'); }}
-                className="lemonsqueezy-button relative px-4 py-1.5 bg-[#0070F3] hover:bg-[#005bb5] text-white text-xs font-bold rounded-lg shadow-sm transition-all active:scale-95"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.localStorage.setItem('checkoutType', 'pro');
+                  }
+                }}
+                className="lemonsqueezy-button relative px-4 py-1.5 bg-[#0070F3] hover:bg-[#005bb5] text-white text-xs font-bold rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer"
               >
                 Go Pro
               </a>
@@ -770,7 +786,11 @@ export default function Home() {
                       ) : (
                         <a 
                           href="https://desmindspace.lemonsqueezy.com/checkout/buy/8a425593-2af6-42d3-8018-98e97cc4d0df?embed=1" 
-                          onClick={() => { if(typeof window !== 'undefined') window.localStorage.setItem('checkoutType', 'single'); }}
+                          onClick={() => {
+                            if (typeof window !== 'undefined') {
+                              window.localStorage.setItem('checkoutType', 'single');
+                            }
+                          }}
                           className="lemonsqueezy-button flex-1 sm:flex-none py-3 px-5 rounded-xl text-xs font-bold text-white bg-black hover:bg-gray-800 shadow-md transition-all active:scale-95 text-center cursor-pointer"
                         >
                           Download Full PDF
