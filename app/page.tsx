@@ -263,7 +263,7 @@ export default function Home() {
       a.click();
     } catch (error: any) { 
       alert('Error: ' + error.message); 
-    } fontally {
+    } finally {
       if (isWatermarked) setIsDownloadingFree(false);
     }
   };
