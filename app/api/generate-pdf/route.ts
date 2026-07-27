@@ -51,8 +51,15 @@ export async function POST(req: Request) {
       logoHtml = `<img src="${data.logo}" class="company-logo" />`;
     }
 
+    // OPVALLENDE FOOTER WATERMARK VOOR DE GRATIS VERSIE
     const watermarkHtml = data.isWatermarked 
-      ? `<div class="watermark">PREVIEW DRAFT</div>` 
+      ? `
+        <div class="watermark-footer">
+          <img src="https://www.pdfbuilder.org/logo.png" class="watermark-logo" alt="QuoteBuilder Logo" />
+          <div class="watermark-title">Created with <span>QuoteBuilder.org</span></div>
+          <div class="watermark-subtitle">Generate your own official AI PDF quotes for free at QuoteBuilder.org</div>
+        </div>
+      ` 
       : '';
 
     const tableRowsHtml = items.map(item => `
@@ -71,7 +78,7 @@ export async function POST(req: Request) {
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-            @page { size: A4; margin: 18mm 20mm; }
+            @page { size: A4; margin: 15mm 18mm; }
             * { box-sizing: border-box; }
             
             body { 
@@ -84,7 +91,7 @@ export async function POST(req: Request) {
 
             .header {
               display: flex; justify-content: space-between; align-items: flex-start;
-              border-bottom: 2px solid #E5E7EB; padding-bottom: 6mm; margin-bottom: 6mm;
+              border-bottom: 2px solid #E5E7EB; padding-bottom: 5mm; margin-bottom: 5mm;
             }
 
             .company-logo { max-height: 18mm; max-width: 55mm; object-fit: contain; }
@@ -96,7 +103,7 @@ export async function POST(req: Request) {
 
             .quote-meta { font-size: 8.5pt; color: #4B5563; text-align: right; margin-top: 2mm; }
 
-            .details-grid { display: flex; justify-content: space-between; margin-bottom: 8mm; }
+            .details-grid { display: flex; justify-content: space-between; margin-bottom: 6mm; }
             .details-block { width: 48%; }
             .details-block h4 {
               font-size: 8pt; font-weight: 700; text-transform: uppercase;
@@ -106,23 +113,23 @@ export async function POST(req: Request) {
 
             .summary-box {
               background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 6px;
-              padding: 4mm 5mm; margin-bottom: 6mm;
+              padding: 4mm 5mm; margin-bottom: 5mm;
             }
             .summary-box h3 { margin: 0 0 1.5mm 0; font-size: 10pt; font-weight: 700; }
             .summary-box p { margin: 0; color: #4B5563; font-size: 9pt; }
 
-            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 6mm; }
+            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; }
             .items-table th {
               background: #F3F4F6; color: #374151; font-size: 8pt; font-weight: 700;
               text-transform: uppercase; letter-spacing: 0.5px; padding: 2.5mm 3.5mm;
               text-align: left; border-bottom: 1px solid #D1D5DB;
             }
-            .items-table td { padding: 3mm 3.5mm; border-bottom: 1px solid #E5E7EB; font-size: 9pt; color: #111827; }
+            .items-table td { padding: 2.5mm 3.5mm; border-bottom: 1px solid #E5E7EB; font-size: 9pt; color: #111827; }
 
             .text-right { text-align: right; }
             .text-center { text-align: center; }
 
-            .totals-container { display: flex; justify-content: flex-end; margin-bottom: 8mm; }
+            .totals-container { display: flex; justify-content: flex-end; margin-bottom: 6mm; }
             .totals-table { width: 45%; border-collapse: collapse; }
             .totals-table td { padding: 1.5mm 0; font-size: 9pt; color: #4B5563; }
             .totals-table .grand-total {
@@ -132,36 +139,60 @@ export async function POST(req: Request) {
 
             .terms-grid {
               display: flex; justify-content: space-between; gap: 6mm;
-              border-top: 1px solid #E5E7EB; padding-top: 5mm; margin-bottom: 6mm;
+              border-top: 1px solid #E5E7EB; padding-top: 4mm; margin-bottom: 5mm;
             }
             .terms-box { width: 48%; font-size: 8pt; color: #6B7280; }
             .terms-box h5 { margin: 0 0 1mm 0; font-size: 8pt; font-weight: 700; color: #374151; }
 
-            /* SIGN-OFF BLOCK CORRECTION */
             .signoff-container {
-              border: 1px solid #E5E7EB; border-radius: 6px; padding: 5mm 6mm;
+              border: 1px solid #E5E7EB; border-radius: 6px; padding: 4mm 5mm;
               background: #FAFAFA; display: flex; justify-content: space-between; gap: 10mm;
             }
             .signoff-box { width: 48%; }
-            .signoff-title { font-size: 8pt; font-weight: 700; text-transform: uppercase; color: #374151; margin-bottom: 10mm; }
+            .signoff-title { font-size: 8pt; font-weight: 700; text-transform: uppercase; color: #374151; margin-bottom: 8mm; }
             
-            .signoff-lines {
-              display: flex; justify-content: space-between; gap: 4mm;
-            }
+            .signoff-lines { display: flex; justify-content: space-between; gap: 4mm; }
             .signoff-field { flex: 1; }
             .signoff-line { border-bottom: 1px solid #9CA3AF; height: 1px; margin-bottom: 1.5mm; }
             .signoff-label { font-size: 7.5pt; color: #6B7280; }
 
-            .watermark {
-              position: fixed; top: 50%; left: 50%;
-              transform: translate(-50%, -50%) rotate(-45deg);
-              font-size: 7rem; font-weight: 900; color: rgba(0, 0, 0, 0.04);
-              z-index: 9999; pointer-events: none;
+            /* STYLING VOOR DE GROTE MERK-FOOTER */
+            .watermark-footer {
+              margin-top: 6mm;
+              padding: 5mm 6mm;
+              background-color: #030712;
+              border-radius: 8px;
+              text-align: center;
+              color: #ffffff;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 2mm;
+            }
+            .watermark-logo {
+              height: 12mm;
+              width: auto;
+              object-fit: contain;
+            }
+            .watermark-title {
+              font-size: 16pt;
+              font-weight: 800;
+              color: #ffffff;
+              margin: 0;
+              letter-spacing: -0.5px;
+            }
+            .watermark-title span {
+              color: #3b82f6;
+            }
+            .watermark-subtitle {
+              font-size: 8pt;
+              color: #9ca3af;
+              margin: 0;
             }
           </style>
         </head>
         <body>
-          ${watermarkHtml}
           
           <div class="header">
             <div>
@@ -242,7 +273,6 @@ export async function POST(req: Request) {
             </div>
           </div>
 
-          <!-- SIGN-OFF BLOCK CORRECTION -->
           <div class="signoff-container">
             <div class="signoff-box">
               <div class="signoff-title">CLIENT APPROVAL & SIGNATURE</div>
@@ -272,6 +302,9 @@ export async function POST(req: Request) {
               </div>
             </div>
           </div>
+
+          <!-- FOOTER WATERMARK ONDERAAN DE PDF -->
+          ${watermarkHtml}
 
         </body>
       </html>
