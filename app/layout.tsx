@@ -26,6 +26,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: 'https://www.yourdomain.com', 
+  }
 };
 
 export default function RootLayout({
@@ -33,19 +36,59 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "QuoteBuilder",
-    "operatingSystem": "All",
-    "applicationCategory": "BusinessApplication",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "EUR"
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "QuoteBuilder",
+      "operatingSystem": "All",
+      "applicationCategory": "BusinessApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "description": "Generate professional and official PDF quotes in seconds with smart AI project estimation and automatic company lookup."
     },
-    "description": "Generate professional and official PDF quotes in seconds with smart AI project estimation and automatic company lookup."
-  };
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does the AI Quote Generator estimate hours and rates?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Our AI engine analyzes your project description, identifies key deliverables, and estimates realistic hours based on industry standards. If you specify an hourly rate (e.g., 'rate 50'), it automatically calculates the total line items accordingly."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I automatically import company data (KBO / VAT)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! By typing your company name or client name in the Smart Company Search bar, our system connects directly with public enterprise registries to auto-fill official registered names, addresses, and VAT numbers."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the generated PDF quote legally binding and official?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutely. Every generated PDF includes official quote components: unique Quote tracking numbers, issue & expiry dates, itemized breakdowns with VAT rates, terms & conditions, and formal client approval signature blocks."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between 'Download free quote' and 'Download Full PDF'?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Downloading a free quote provides a draft document containing a watermark for quick previews and internal review. Downloading the full PDF provides an un-watermarked, official document ready to send directly to your client."
+          }
+        }
+      ]
+    }
+  ];
 
   return (
     <html lang="en">
