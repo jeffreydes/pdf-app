@@ -75,42 +75,10 @@ export default function Home() {
     }
   }, []);
 
-  // Re-scan DOM for Lemon Squeezy overlay links whenever the step changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const timer = setTimeout(() => {
-        if ((window as any).createLemonSqueezy) {
-          (window as any).createLemonSqueezy();
-        }
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [currentStep]);
-
   // Dynamic currency formatting based on selection
   const formatCurrency = (amount: number) => {
     const locale = currency === 'EUR' ? 'de-DE' : 'en-US';
     return new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format(amount);
-  };
-
-  const handleLemonSqueezyScriptLoad = () => {
-    if (typeof window !== 'undefined' && (window as any).createLemonSqueezy) {
-      (window as any).createLemonSqueezy();
-      (window as any).LemonSqueezy?.Setup({
-        eventHandler: (event: any) => {
-          if (event.event === 'Checkout.Success') {
-            const checkoutType = window.localStorage.getItem('checkoutType');
-            
-            if (checkoutType === 'pro') {
-              window.localStorage.setItem('isPro', 'true');
-              setIsPro(true);
-            }
-            
-            setHasPaid(true);
-          }
-        }
-      });
-    }
   };
 
   // Provider Search (Step 2)
@@ -308,7 +276,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#111827] font-sans antialiased flex flex-col justify-between overflow-x-hidden">
-      <Script src="https://assets.lemonsqueezy.com/lemon.js" strategy="afterInteractive" onReady={handleLemonSqueezyScriptLoad} />
 
       {/* HEADER */}
       <header className="bg-white/80 border-b border-gray-200/80 px-4 sm:px-8 py-4 flex justify-between items-center shadow-sm sticky top-0 z-50 backdrop-blur-md">
@@ -339,19 +306,19 @@ export default function Home() {
             ))}
           </div>
 
-          {/* MONTHLY SUBSCRIPTION BUTTON */}
+          {/* MONTHLY SUBSCRIPTION BUTTON (STRIPE) */}
           {!isPro ? (
             <div className="relative group inline-flex">
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-500 rounded-lg blur opacity-60 group-hover:opacity-100 animate-pulse transition duration-500"></div>
               
               <a 
-                href="https://desmindspace.lemonsqueezy.com/checkout/buy/e5319fca-00c7-4959-89ee-6ba719d2c0a4?embed=1" 
+                href="https://buy.stripe.com/bJebJ0fpF3sZciIgYD1RC02" 
                 onClick={() => {
                   if (typeof window !== 'undefined') {
                     window.localStorage.setItem('checkoutType', 'pro');
                   }
                 }}
-                className="lemonsqueezy-button relative px-4 py-1.5 bg-[#0070F3] hover:bg-[#005bb5] text-white text-xs font-bold rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer"
+                className="relative px-4 py-1.5 bg-[#0070F3] hover:bg-[#005bb5] text-white text-xs font-bold rounded-lg shadow-sm transition-all active:scale-95 cursor-pointer"
               >
                 Go Pro
               </a>
