@@ -277,8 +277,29 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-[#111827] font-sans antialiased flex flex-col justify-between overflow-x-hidden">
 
+      {/* TOP CROSS-PROMO BANNER */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white text-xs py-2.5 px-4 text-center border-b border-slate-800/80 flex items-center justify-center gap-1.5 flex-wrap relative z-50 shadow-xs">
+        <span className="bg-blue-500/20 text-blue-400 border border-blue-500/30 font-bold px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider hidden sm:inline-block">
+          Brand Asset Tip
+        </span>
+        <span className="text-slate-300 font-medium">
+          Preparing brand assets for print?
+        </span>
+        <span className="text-slate-200">
+          Generate print-ready vector brand books instantly with
+        </span>
+        <a 
+          href="https://www.brandguidemaker.com" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="font-bold text-white hover:text-blue-400 underline underline-offset-2 transition-colors inline-flex items-center gap-0.5"
+        >
+          BrandGuideMaker <span className="text-[10px]">→</span>
+        </a>
+      </div>
+
       {/* HEADER */}
-      <header className="bg-white/80 border-b border-gray-200/80 px-4 sm:px-8 py-4 flex justify-between items-center shadow-sm sticky top-0 z-50 backdrop-blur-md">
+      <header className="bg-white/80 border-b border-gray-200/80 px-4 sm:px-8 py-4 flex justify-between items-center shadow-sm sticky top-0 z-40 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 bg-black rounded-lg flex items-center justify-center text-white font-black text-xs">Q</div>
           <span className="font-bold text-sm tracking-tight text-gray-900 hidden sm:block">QuoteBuilder</span>
